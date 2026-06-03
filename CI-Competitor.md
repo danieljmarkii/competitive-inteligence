@@ -1,8 +1,12 @@
-# CI — Competitor File (v1.5) — Lean Sources + Navigation Flags
+# CI — Competitor File — Lean Sources + Navigation Flags
+
+> **version:** 2.0 · **owner:** Competitive Intelligence · **last updated:** 2026-06-03
+> Track versions in git, not in the filename.
 
 Purpose
-- Canonical competitor list (names + aliases) and starting source URLs to monitor for product changes.
-- This file is **data**, not methodology. Global crawling/navigation rules live in the Prompt File.
+- Canonical competitor list (names + aliases) and **starting** source URLs to monitor for product changes.
+- This file is **data**, not methodology. Global crawling/navigation/discovery rules live in the Prompt File.
+- URLs here are a *starting point*, not a closed set. When a source is blocked or stale, the Prompt File's runtime discovery procedure finds a live equivalent and the run flags it back here (see "Source health" below).
 
 Hard rules
 - Do **not** invent competitors outside this file.
@@ -12,22 +16,37 @@ Hard rules
 ---
 
 ## Flags (source behavior hints)
-- `index` : the URL is a hub/listing; you must click/open child pages in-window.
+- `index` : the URL is a hub/listing; you must open child pages in-window.
 - `running_list` : a single long page with many dated entries/sections; find month headers and extract in-window.
 - `ui_dynamic` : content often hides behind tabs/accordions; avoid click-reliance (prefer text extraction + find).
-- `login` : likely requires authentication; if blocked, record Access limits and do not claim “no notable changes.”
+- `login` : likely requires authentication; if blocked, record Access limits and do not claim "no notable changes."
+- `bot_blocked` : known to block automated fetches (403/429/captcha/JS-wall). Trigger runtime discovery; do not treat as "no changes."
 - `search_required` : no reliable release notes; use constrained web search as a fallback.
 - `press` : secondary signal source (e.g., PRWeb); downgrade confidence unless corroborated.
-- `year_pinned` : URL/title is scoped to a specific year; if it doesn’t match the window year, find the equivalent page(s) for the window year.
+- `year_pinned` : URL/title is scoped to a specific year; if it doesn't match the window year, find the equivalent page(s) for the window year.
 
 ## Source kinds (scan order hint)
 `release_notes | product_updates | help_center | docs | blog | community | roadmap | status | press`
 
 ---
 
+## Source health (maintained by the monthly run)
+Each `/ci-report` run appends/refreshes a short list of sources that were **blocked, stale, or replaced**, so URLs can be curated over time instead of all at once. Format:
+
+```text
+- <Competitor> | <url> | status: <bot_blocked|404|stale|replaced> | observed: YYYY-MM-DD
+  Suggested replacement (if found): <url>
+```
+
+> The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
+
+*(No entries yet — first managed run will populate this.)*
+
+---
+
 ## Data (YAML)
 ```yaml
-version: "1.5"
+version: "2.0"
 
 competitors:
   - name: "15Five"
