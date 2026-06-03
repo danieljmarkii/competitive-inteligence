@@ -268,5 +268,5 @@ competitors:
   - name: "UKG"
     aliases: ["UKG Ready", "UKG Pro", "UKG Pro WFM", "Kronos"]
     website: "https://www.ukg.com/"
-    sources:
+    # No curated sources yet — relies on runtime discovery (see Prompt File).
 ```
