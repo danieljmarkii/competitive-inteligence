@@ -1,0 +1,15 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Local, machine-specific Claude Code settings (keep shared config in .claude/)
+.claude/settings.local.json
+
+# Editor noise
+.idea/
+.vscode/
+*.swp
+
+# Scratch / generated report output
+/out/
+*.tmp

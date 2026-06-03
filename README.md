@@ -10,6 +10,7 @@ Monthly competitor-update workflow, run from Claude Code.
 | `CI-Competitor.md` | **Data** — competitor list, aliases, starting source URLs, and source flags. | You add/remove a competitor or curate source URLs. |
 | `CI-Prompt.md` | **Methodology** — how the analysis is run and how output is formatted. | You want to change *how* the report works or looks. |
 | `.claude/commands/ci-report.md` | The `/ci-report` slash command that ties it all together. | Rarely — it just orchestrates the three files above. |
+| `CLAUDE.md` | **Project memory** auto-loaded by Claude Code — the operating contract and non-negotiable conventions. | When the workflow's rules or file roles change. |
 
 > Versions live in each file's header and in git history — **not** in the filename. That keeps the slash command stable.
 
