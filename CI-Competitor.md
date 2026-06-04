@@ -1,6 +1,6 @@
 # CI — Competitor File — Lean Sources + Navigation Flags
 
-> **version:** 2.2 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
+> **version:** 2.3 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
 > Track versions in git, not in the filename.
 
 Purpose
@@ -42,6 +42,35 @@ Each `/ci-report` run appends/refreshes a short list of sources that were **bloc
 ```
 
 > The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
+
+### 2026-05 re-run (observed 2026-06-04, full run, WebFetch restored)
+> Clean re-run of the May 2026 window now that `WebFetch` works again (every fetch had 403'd in the original 2026-05 run). Direct fetch succeeded for Lattice, Predictive Index, Culture Amp, 15Five; `WebSearch` filled the rest. Remaining failures are vendor-side bot-walls / JS-only changelogs, not an environment block — apply the route-around playbook (CI-Prompt §Runtime discovery) before promoting any replacement.
+
+```text
+VERIFIED-GOOD primaries this run (promote/keep):
+- Lattice | https://lattice.com/blog/<month>-<year>-product-updates | dated monthly roundup, fetched clean (e.g. .../may-2026-product-updates)
+- Predictive Index | https://docs.predictiveindex.com/en/collections/12282995-release-notes | dated entries, fetched clean
+- 15Five | https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases | fetched clean, dated
+- Culture Amp | https://updates.cultureamp.com | fetched clean, dated (no public RSS — see feed-verification note)
+
+Blocked / stale this run (try Wayback + section Atom feed before declaring Unknown):
+- Betterworks | https://support.betterworks.com/hc/en-us/sections/360012378232-Release-Notes | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): individual dated KB "Release: <date>" articles; section Atom feed .../sections/360012378232/articles.atom
+- BambooHR | https://www.bamboohr.com/product-updates/ | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): per-feature child pages, e.g. https://www.bamboohr.com/product-updates/embedded-eor-offboarding (find the On-Demand Pay child, shipped 2026-05-11)
+- Leapsome | https://help.leapsome.com/hc/en-us/articles/360004361834-Platform-improvements | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): https://site.leapsome.com/blog/product-updates-<mon>-<year> (verified live: .../product-updates-mar-2026; may-2026 slug 404'd)
+- Officevibe (Workleap) | https://help.workleap.com/en/ | status: replaced | observed: 2026-06-04
+  Suggested replacement (if found): (changelog.workleap.com does NOT resolve — locate Workleap's real what's-new surface)
+- Engagedly | https://changelog.engagedly.com | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): JS-only hosted changelog — find its JSON/RSS backend (AnnounceKit/Beamer/Headway)
+- Microsoft Viva / Glint | https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%e2%80%93-volume-3-edition-5-may-2026/4519204 | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): (title renders, body does not via WebFetch; content recovered via WebSearch — fetch partial)
+- Qualtrics | https://community.qualtrics.com/product-release-notes-96 | status: login | observed: 2026-06-04
+  Suggested replacement (if found): weekly note pages indexed but login-walled, e.g. .../weekly-product-release-notes-may-6-2026-33255
+- SurveyMonkey | https://www.surveymonkey.com/curiosity/category/product-news/ | status: stale | observed: 2026-06-04
+  Suggested replacement (if found): page lists posts but no per-post dates in HTML-to-text — needs a dated surface
+```
 
 ### 2026-06 feed verification (observed 2026-06-04)
 > **`WebFetch` now works in this environment** — `example.com` and both vendor pages fetched clean (200), reversing the environment-wide 403 the 2026-05 run hit. Re-verified the May 2026 items and hunted for RSS/changelog feeds for both promoted primaries. **Result: neither vendor exposes a public feed — there is no `feed`-kind URL to promote for either.**
@@ -175,6 +204,11 @@ competitors:
     aliases: []
     website: "https://lattice.com/"
     sources:
+      # PRIMARY (verified clean-fetch 2026-06-04): dated monthly roundup, one post per month —
+      # pattern https://lattice.com/blog/<month>-<year>-product-updates (e.g. .../may-2026-product-updates).
+      - kind: blog
+        url: "https://lattice.com/blog/may-2026-product-updates"
+        flags: ["running_list", "month_pinned"]
       - kind: product_updates
         url: "https://lattice.com/product-updates"
         flags: ["index", "running_list", "ui_dynamic"]
@@ -233,7 +267,7 @@ competitors:
     sources:
       - kind: product_updates
         url: "https://www.bamboohr.com/product-updates/"
-        flags: ["index", "ui_dynamic"]
+        flags: ["index", "ui_dynamic", "bot_blocked"]
       - kind: help_center
         url: "https://help.bamboohr.com/"
         flags: ["index"]
@@ -244,7 +278,7 @@ competitors:
     sources:
       - kind: release_notes
         url: "https://support.betterworks.com/hc/en-us/sections/360012378232-Release-Notes"
-        flags: ["index", "ui_dynamic"]
+        flags: ["index", "ui_dynamic", "bot_blocked"]
       - kind: help_center
         url: "https://support.betterworks.com/hc/en-us"
         flags: ["index", "ui_dynamic"]
@@ -274,7 +308,11 @@ competitors:
     sources:
       - kind: product_updates
         url: "https://help.leapsome.com/hc/en-us/articles/360004361834-Platform-improvements"
-        flags: ["running_list", "ui_dynamic"]
+        flags: ["running_list", "ui_dynamic", "bot_blocked"]
+      # Dated monthly roundup (fetchable surface) — pattern site.leapsome.com/blog/product-updates-<mon>-<year>.
+      - kind: blog
+        url: "https://site.leapsome.com/blog/product-updates-mar-2026"
+        flags: ["running_list", "month_pinned"]
       - kind: help_center
         url: "https://help.leapsome.com/"
         flags: ["index", "ui_dynamic"]
