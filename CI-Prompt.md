@@ -1,6 +1,6 @@
 # CI — Prompt File — Monthly Competitor Update (Slack-first, package-organized)
 
-> **version:** 3.1 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
+> **version:** 3.2 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
 > Track versions in git, not in the filename. Invoked by `.claude/commands/ci-report.md`.
 
 ## ROLE & OPERATING STANCE
@@ -75,6 +75,8 @@ Trigger when a source returns 403/429/captcha, is login-walled, errors, is empty
 4. **LinkedIn / social (discovery only).** Use to find leads, not as a primary source. Includable only if it links to an official page describing the change (use that as primary), or contains concrete product detail **and** a verifiable in-window date. Otherwise drop or place in the Low-confidence watchlist (max 3).
 
 **Guardrails:** Never convert "blocked/inaccessible" into "no notable changes." Do not include roadmap teasers unless verifiably available in-window (GA/Beta/Pilot with date). For every blocked/stale/replaced source, add an entry to **Source Health** (with a suggested replacement if you found a better URL). **Discovery budget:** once you have authoritative in-window evidence — or have exhausted official sibling surfaces plus 2–3 targeted searches with nothing material — stop and record the outcome rather than over-crawling.
+
+> **Environment-wide fetch failure (learned 2026-05).** If `WebFetch` returns 403/blocked on the **first 2–3 unrelated domains**, treat it as an **environment network-policy block**, not vendor bot-walls — stop trying to fetch and switch to **`WebSearch`-only** mode for the whole run. In that mode: (a) trust the search **Links** (real indexed URLs) over the result *summary*, which is unreliable on dates; (b) force release text into snippets with **feature- and date-specific** queries (e.g., the exact feature name + "now available"/"GA" + Month YYYY); (c) every unread primary source is **Unknown — access-limited**, never "no notable changes," and goes in Source Health. Surface the environment limitation explicitly in the Brief's Coverage report so the reader knows coverage was constrained. When feasible, re-run where outbound fetch is permitted.
 
 ---
 
