@@ -1,6 +1,6 @@
 # CI — Prompt File — Monthly Competitor Update (Slack-first, package-organized)
 
-> **version:** 3.2 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
+> **version:** 3.4 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
 > Track versions in git, not in the filename. Invoked by `.claude/commands/ci-report.md`.
 
 ## ROLE & OPERATING STANCE
@@ -46,6 +46,15 @@ Include only items whose **operative date** falls within the window (inclusive).
 ## COLLECTION & NAVIGATION RULES (MANDATORY)
 Apply to **all** competitors and sources.
 
+**Multi-channel listening (channel order).** Do not depend on a single page or a single tool — a vendor that goes dark on one channel is usually visible on another. For each competitor, collect in this order and **cross-confirm** rather than trusting one signal:
+1. **`feed`** (RSS/Atom/JSON changelog) — most machine-readable and dated; survives bot-walls best. If a `feed` source is listed, scan it first. If not, look for one during discovery (see Runtime discovery §1) before scraping HTML.
+2. **Official `release_notes` / `product_updates` HTML** — the canonical running list / hub.
+3. **Official `blog` / `newsroom` / `docs` changelog** — dated child posts.
+4. **`press` wires** — catch the *big* launches; corroboration, not routine releases.
+5. **`social` (LinkedIn/X) and third-party aggregators** — **lead/discovery only**: learn that something shipped and its name, then pull the official dated doc to cite (see Materiality Gate de-dup hierarchy). Never cite social as the primary source for a release.
+
+A single change may surface on several channels — keep **one record per change** (de-dup hierarchy below) and cite the single best primary source.
+
 **A) Target-month handling.** For each month in `TARGET_MONTHS`, generate header match strings: "Month YYYY", "Mon YYYY", and common variants ("Month YYYY Releases", "Month YYYY Product Updates", "Release: Month YYYY"). On a `running_list` page, find the first header for the month, then extract items until the next month header.
 
 **B) Index drill-down.** If a source is an `index`/hub, open the linked month/post pages within the window — do not stop at the index. Prioritize: (1) links whose titles contain a Month/Year in the window, (2) links with visible published dates in the window, (3) most-recent links until the window is covered.
@@ -66,6 +75,17 @@ Apply to **all** competitors and sources.
 Trigger when a source returns 403/429/captcha, is login-walled, errors, is empty in HTML-to-text, or is flagged `bot_blocked` / `login` / `search_required`. Run top → bottom; **stop as soon as you find authoritative, in-window evidence**.
 
 1. **Official sibling surfaces (preferred).** Try other official surfaces for the same vendor before leaving the domain: a different release-notes/help-center path, the product blog, `/newsroom`, `/whats-new`, a docs changelog, or the site sitemap. Many vendors block one path but leave another open.
+   - **Changelog-subdomain probe.** Many vendors run a dedicated public changelog at a predictable address. Probe: `updates.<domain>`, `whatsnew.<domain>`, `changelog.<domain>`, `<domain>/changelog`, `<domain>/release-notes`, `<domain>/whats-new`. (e.g., Culture Amp publishes at `updates.cultureamp.com`.) These are often cleaner and more fetchable than the help-center running list.
+   - **Feed discovery + verification.** Prefer a machine-readable feed when one exists. For any product-updates/changelog page, look for a sibling feed: `/rss`, `/rss.xml`, `/atom`, `/atom.xml`, `feed.json`, or a `<link rel="alternate" type="application/rss+xml">` / `application/feed+json` in the page `<head>` (hosted changelog tools — AnnounceKit, Beamer, Headway, Intercom — expose these by default). **Verify** the feed actually returns dated entries before relying on it; if confirmed, record it under Source Health as a suggested `feed` source so a human can promote it. Do **not** hardcode a guessed feed URL you could not verify.
+   **Bot-wall & JS-only route-arounds (run these before declaring a source Unknown).** A 403 or an empty HTML-to-text result is rarely the whole story — the same change is almost always reachable through a channel the vendor doesn't defend. Don't fight the wall; route around it:
+   - **Search-engine index as a read-through cache.** Public crawlers are whitelisted where your fetcher is not, so a page that 403s for `WebFetch` is usually readable via `WebSearch`. Query the exact feature name + "now available" / "GA" / Month YYYY and trust the indexed **title/snippet** — never the AI summary's dates (see date-distrust rule). This is the first move whenever a fetch 403s.
+   - **Wayback Machine / archive.org.** Fetch the archived snapshot instead of the live origin: `https://web.archive.org/web/<YYYYMMDD>/<url>` (or `https://web.archive.org/web/2/<url>` for the latest capture). Archived copies are served WAF-free and as static HTML, which also defeats JS-only pages. Highest-leverage move for Zendesk/Freshdesk help-centers that hard-403.
+   - **Help-center feeds & sitemaps.** Zendesk exposes section Atom feeds (`<host>/hc/<locale>/sections/<id>/articles.atom`) and `/sitemap.xml`; Freshdesk and most KBs expose sitemaps too. These endpoints are frequently **not** behind the same WAF rules as the HTML index — try them before giving up on a 403'd help-center.
+   - **Hosted-changelog backends.** A JS-only changelog (e.g., `changelog.<vendor>.com`) is usually AnnounceKit / Beamer / Headway / Canny / Intercom — all of which expose a JSON or RSS endpoint returning clean dated entries with no JS rendering. Find and verify it (see Feed discovery + verification above).
+   - **Sibling child-pages.** One blocked path ≠ a blocked domain. If a `/product-updates/` index 403s, its dated child posts (`/product-updates/<slug>`) and the press wire often resolve fine — pull the dated child as the primary source.
+
+   **Ethics / scope (non-negotiable).** Route around **public** surfaces only. Do **not** attempt to defeat **authentication/login walls** — that is gated content, not a bot-wall; record it as `login` in Source Health and use public-indexed titles + official docs instead. Do **not** use IP/proxy rotation, user-agent or fingerprint spoofing, or CAPTCHA-solving to evade bot detection — these breach site ToS and are out of scope. The durable fix for WAF 403s is environmental, not adversarial: run where outbound fetch egresses from a non-datacenter IP (or add a JS-rendering fetch step), which clears most blocks at once.
+
 2. **Authoritative web search.** Find an official page describing the change directly. **Iterate the vendor's `aliases` from CI-Competitor.md as alternate query terms** (product-line or acquired-brand names) — a change may be announced under an alias (e.g., Glint, Peakon, Emplify, Kona).
    - `"<Competitor or alias>" (release notes OR product updates OR changelog OR "what's new") <Month> <YYYY>`
    - `site:<competitor-domain> (release notes OR product updates OR changelog) <YYYY>`
@@ -76,7 +96,14 @@ Trigger when a source returns 403/429/captcha, is login-walled, errors, is empty
 
 **Guardrails:** Never convert "blocked/inaccessible" into "no notable changes." Do not include roadmap teasers unless verifiably available in-window (GA/Beta/Pilot with date). For every blocked/stale/replaced source, add an entry to **Source Health** (with a suggested replacement if you found a better URL). **Discovery budget:** once you have authoritative in-window evidence — or have exhausted official sibling surfaces plus 2–3 targeted searches with nothing material — stop and record the outcome rather than over-crawling.
 
-> **Environment-wide fetch failure (learned 2026-05).** If `WebFetch` returns 403/blocked on the **first 2–3 unrelated domains**, treat it as an **environment network-policy block**, not vendor bot-walls — stop trying to fetch and switch to **`WebSearch`-only** mode for the whole run. In that mode: (a) trust the search **Links** (real indexed URLs) over the result *summary*, which is unreliable on dates; (b) force release text into snippets with **feature- and date-specific** queries (e.g., the exact feature name + "now available"/"GA" + Month YYYY); (c) every unread primary source is **Unknown — access-limited**, never "no notable changes," and goes in Source Health. Surface the environment limitation explicitly in the Brief's Coverage report so the reader knows coverage was constrained. When feasible, re-run where outbound fetch is permitted.
+> **Environment-wide fetch failure (learned 2026-05, re-confirmed 2026-06).** If `WebFetch` returns 403/blocked on the **first 2–3 unrelated domains** (e.g., a test fetch of `example.com` also 403s), treat it as an **environment network-policy block**, not vendor bot-walls — stop trying to fetch and switch to **`WebSearch`-only** mode for the whole run. In that mode:
+> - (a) Trust the search **Links** (real indexed URLs) over the result *summary*, which is unreliable on dates.
+> - (b) Force release text into snippets with **feature- and date-specific** queries (e.g., the exact feature name + "now available"/"GA" + Month YYYY).
+> - (c) **Two-pass discovery (defeats the chicken-and-egg).** Search-only mode can't read the changelog to learn feature names, but feature-specific queries are what actually surface dated items. So: **Pass 1 — harvest names.** Run broad queries against indexable lead surfaces (newsroom, blog, press wires, `social`, third-party aggregators/analyst posts) to collect the *names* of things that shipped in-window. **Pass 2 — confirm.** For each candidate name, run a feature-specific query to pin the official source + operative date.
+> - (d) **Distrust summary dates — both directions.** Never accept a release **date** from a search *summary* (in 2026-06 a summary asserted 15Five "HRIS Sync 2.0" shipped "April 29th" when the live page said "Released May 14th"). Require the date to appear in an indexed page **title/snippet** or the dated entry itself. If you cannot, mark `Date: Unknown` — do **not** guess it earlier *or* later to force it in/out of the window.
+> - (e) Every unread primary source is **Unknown — access-limited**, never "no notable changes," and goes in Source Health.
+>
+> Surface the environment limitation explicitly in the Brief's Coverage report so the reader knows coverage was constrained. When feasible, re-run where outbound fetch is permitted (a more permissive environment network policy, or local Claude Code) — that single change unblocks every page above. See https://code.claude.com/docs/en/claude-code-on-the-web.
 
 ---
 
