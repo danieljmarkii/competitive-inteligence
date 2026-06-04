@@ -43,6 +43,12 @@ Each `/ci-report` run appends/refreshes a short list of sources that were **bloc
 
 > The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
 
+### 2026-06 feed verification (observed 2026-06-04)
+> **`WebFetch` now works in this environment** — `example.com` and both vendor pages fetched clean (200), reversing the environment-wide 403 the 2026-05 run hit. Re-verified the May 2026 items and hunted for RSS/changelog feeds for both promoted primaries. **Result: neither vendor exposes a public feed — there is no `feed`-kind URL to promote for either.**
+>
+> - **15Five** (`success.15five.com`, Zendesk Help Center): the "What's new" running list is a *single Zendesk article* (`50989471559067`), not a section/blog, so it has no syndication feed. Probes 404'd / served HTML: `…/50989471559067.atom`, `/hc/en-us/sections.atom`. Page "last updated 2026-05-29 03:56." May 2026 items verified on-page: Custom Automated Review Schedules (05-20), Manager Display Name Customization (05-19), HRIS Sync 2.0 (05-14), Download All Survey Results as Zip (05-05). ⚠️ Date discrepancy: search still indexes the *stale* article dating HRIS Sync 2.0 to "April 29" — the live running list (authoritative) says "Released May 14th." Trust the live page.
+> - **Culture Amp** (`updates.cultureamp.com`, Intercom News): no public RSS/Atom/JSON feed exists (Intercom News uses RSS only as an API input, not output). Probes 404'd: `/rss`, `/feed`, `/feed.rss`; no `<link rel="alternate">` in the page head. The newsfeed page is itself the machine-readable surface. May 2026 items verified on-page: Self-Service SAML/SSO (05-14), Scoped Surveys (Limited) Role (05-06), Cascading Goals (05-05). (June 01 SAML "all accounts" item is out of the May window.)
+
 ### 2026-06 curation (observed 2026-06-04)
 > Triggered by two live, in-window pages found manually that the 2026-05 run missed. Root cause was the environment-wide `WebFetch` 403 (search-only mode), compounded by two source-curation gaps now corrected below. See `CI-Data-Quality-Proposal.md` for the full diagnosis.
 
@@ -117,8 +123,10 @@ competitors:
     sources:
       # PRIMARY: public product-updates newsfeed (no login). Verified 2026-06-04 — dated, chronological,
       # category-labeled entries (e.g., "Introducing Self-Service SAML/SSO Configuration", 2026-05-14).
-      # This is Culture Amp's cleanest machine-readable surface; scan it first. Likely a hosted changelog
-      # with a sibling RSS/Atom/JSON feed — discover + verify at runtime (see Prompt File).
+      # This is Culture Amp's cleanest machine-readable surface; scan it first. Hosted on Intercom News,
+      # which exposes NO public RSS/Atom/JSON feed (verified 2026-06-04: /rss, /feed, /feed.rss all 404;
+      # Intercom News offers RSS only as an API *input*, not a syndication output). The newsfeed page
+      # itself is the feed — no sibling feed URL to promote. Do not re-chase one.
       - kind: product_updates
         url: "https://updates.cultureamp.com"
         flags: ["running_list"]
