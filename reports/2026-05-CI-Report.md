@@ -3,56 +3,87 @@
 > **Window:** 2026-05-01 → 2026-05-31 (America/Chicago) · **Generated:** 2026-06-04
 > Produced via `/ci-report 2026-05`. Package taxonomy per `CI-Context.md`: `Engagement` · `Performance` · `Recognition & Rewards` · `Development` · `Other / Cross-Platform`.
 >
-> **Coverage caveat (read first):** this run executed in an environment where **`WebFetch` was blocked (every direct fetch returned HTTP 403)** — an outbound network-policy limit, not vendor bot-walls. All collection ran through authoritative web search. The five items in the digest are confirmed with dated sources; vendors marked **Unknown — access-limited** could not have their primary pages read and must **not** be read as "no changes." See Source Health.
+> **How to use this file:** the two fenced blocks below (**Block A — Monthly Update**, **Block B — Roadmap Watch**) are **Slack paste-ready** — copy the contents of the code block and paste straight into Slack; it uses Slack `*mrkdwn*` (single-asterisk bold, `•` bullets, plain auto-linking URLs, `:emoji:` shortcodes), so it renders correctly. The **Package Brief** further down is the audit-ready backup (markdown).
+>
+> **Coverage caveat:** this run executed where **`WebFetch` was blocked (all direct fetches returned HTTP 403)** — an outbound network-policy limit, not vendor bot-walls. The items in Block A are confirmed with dated sources; vendors marked **Unknown — access-limited** could not have their primary pages read and must **not** be read as "no changes."
 
 ---
 
-# PART 1 — Slack Digest (paste-ready)
+## Block A — Monthly Update (Slack paste-ready)
 
 ```text
-:wave: Monthly Competitor Update — May 2026  (2026-05-01 to 2026-05-31)
-TL;DR: Rivals are racing to wrap listening, skills, and action inside AI platforms — Cornerstone shipped a full AI "workforce readiness" platform and Perceptyx launched a multi-agent AI learning system, while Lattice rebuilt its core review experience.
+:wave: *Competitor Update — May 2026*  (2026-05-01 → 2026-05-31)
+_TL;DR: rivals are racing to wrap listening, skills & action inside AI platforms — Cornerstone shipped a full AI "workforce readiness" platform and Perceptyx launched a multi-agent AI learning system, while Lattice rebuilt its core review experience._
 
-*Engagement*
-• Lattice | Engagement survey filters + Mercer 2025 benchmarks | Date: 2026-05
-  Admins can now filter and group engagement results natively by Job Architecture and Management Type, and compare against new Lattice–Mercer 2025 benchmarks spanning 8 regions, 64 countries, and 16 industries.
-  https://lattice.com/blog/may-2026-product-updates
-• Microsoft Viva / Glint | Copilot-assisted survey comments (GA) | Date: 2026-05
-  Survey takers can now use an in-survey Microsoft Copilot to rephrase and refine their written feedback before submitting.
-  https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%e2%80%93-volume-3-edition-5-may-2026/4519204
-• Microsoft Viva / Glint | Workplace Metrics in Glint reporting (Private Preview) | Date: 2026-05
-  Leaders can view Viva Insights collaboration and work-life-balance metrics alongside survey results and get notified of pattern changes between survey cycles.
-  https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%e2%80%93-volume-3-edition-5-may-2026/4519204
+*:mag: Engagement*
+• *Lattice* — Engagement filters + Mercer 2025 benchmarks  _(2026-05)_
+   Native Job Architecture / Management Type filters; new Mercer 2025 benchmarks across 8 regions, 64 countries, 16 industries.
+   https://lattice.com/blog/may-2026-product-updates
+• *Microsoft Viva Glint* — Copilot-assisted survey comments · GA  _(2026-05)_
+   Survey takers get an in-survey Copilot to rephrase/refine their written feedback.
+   https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%e2%80%93-volume-3-edition-5-may-2026/4519204
+• *Microsoft Viva Glint* — Workplace Metrics in reporting · Preview  _(2026-05)_
+   Viva Insights metrics shown alongside survey results; alerts on pattern changes between cycles.
+   https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%e2%80%93-volume-3-edition-5-may-2026/4519204
 
-*Performance*
-• Lattice | Reviews experience redesign | Date: 2026-05
-  The manager and IC review UI was rebuilt with split "Me" and "My Team" tabs, bulk peer-nomination approvals, and calibration improvements for large-scale sessions.
-  https://lattice.com/blog/may-2026-product-updates
+*:chart_with_upwards_trend: Performance*
+• *Lattice* — Reviews experience redesign  _(2026-05)_
+   Rebuilt manager/IC review UI: "Me" and "My Team" tabs, bulk peer-nomination approvals, large-scale calibration.
+   https://lattice.com/blog/may-2026-product-updates
 
-*Development*
-• Perceptyx | Develop — multi-agent AI learning | Date: 2026-05-14
-  Launched Develop, a system of coordinated AI agents that delivers training and validates comprehension and on-the-job application in real time, as part of its new People Activation System.
-  https://blog.perceptyx.com/perceptyx-launches-develop
+*:books: Development*
+• *Perceptyx* — Develop · multi-agent AI learning  _(2026-05-14)_
+   AI agents deliver training and validate comprehension/application in real time (People Activation System).
+   https://blog.perceptyx.com/perceptyx-launches-develop
 
-*Other / Cross-Platform*
-• Cornerstone OnDemand | Cornerstone Workforce AI platform | Date: 2026-05-20
-  Launched an AI "workforce readiness" intelligence platform (People Graph + Skills Engine) with AI agents that recommend automatable tasks, adaptively coach managers through performance conversations, and surface internal mobility.
-  https://www.cornerstoneondemand.com/company/news-room/press-releases/cornerstone-launches-cornerstone-workforce-ai-the-intelligence-platform-for-workforce-readiness-built-to-amplify-human-potential-exponentially-with-ai/
-• SurveyMonkey | Claude (Anthropic) MCP connector | Date: 2026-05-05
-  Released an MCP connector that lets users create, edit, send, and analyze SurveyMonkey surveys directly inside Claude via natural language.
-  https://www.surveymonkey.com/newsroom/surveymonkey-claude-ai-integration/
+*:gear: Other / Cross-Platform*
+• *Cornerstone* — Workforce AI platform  _(2026-05-20)_
+   AI workforce-readiness platform (People Graph + Skills Engine); agents coach managers, surface automatable tasks & internal mobility.
+   https://www.cornerstoneondemand.com/company/news-room/press-releases/cornerstone-launches-cornerstone-workforce-ai-the-intelligence-platform-for-workforce-readiness-built-to-amplify-human-potential-exponentially-with-ai/
+• *SurveyMonkey* — Claude (Anthropic) MCP connector  _(2026-05-05)_
+   Create, send & analyze SurveyMonkey surveys directly inside Claude via natural language.
+   https://www.surveymonkey.com/newsroom/surveymonkey-claude-ai-integration/
 
-Coverage limited — primary sources unreachable (WebFetch blocked). UNKNOWN (not confirmed unchanged): 15Five, Culture Amp, Qualtrics, Workday Peakon, BambooHR, Betterworks, Engagedly, Leapsome, Officevibe (Workleap), Paylocity, Predictive Index, PerformYard, Gallup, Energage, ADP, UKG. Most recent confirmable items for these date to March–April 2026.
+_Coverage limited — primary sources unreachable (WebFetch blocked). Unknown, not "no change": 15Five, Culture Amp, Qualtrics, Workday Peakon, BambooHR, Betterworks, Engagedly, Leapsome, Officevibe, Paylocity, Predictive Index, PerformYard, Gallup, Energage, ADP, UKG — latest confirmable items mostly Mar–Apr 2026._
 ```
 
 ---
 
-# PART 2 — Package Brief (audit-ready)
+## Block B — Roadmap Watch · Performance Squad (Slack paste-ready)
+
+```text
+:telescope: *Roadmap Watch — Performance Squad*  _(forward-looking; not shipped)_
+Upcoming items from competitors with *public* roadmaps that overlap QW Performance (Reviews · Goals · 1-on-1s · Feedback).
+
+*:dart: Lattice — Spring/Summer 2026*  _(highest priority)_
+• *AI Agent joins your 1:1s* — captures notes, surfaces coaching insights & action items, syncs back to Lattice.  → direct overlap with *QW 1-on-1s*.
+• *Evidence-based AI Reviews* — drafts a review from connected data (1:1s, past reviews, growth areas, feedback); manager stays accountable.  → *QW Performance Reviews* + connected-data play.
+• *Manager-action review experience + "My Team" dashboard* — review UI organized around what needs the manager's attention.
+   https://lattice.com/blog/lattice-spring-summer-2026-product-release
+
+*:large_yellow_circle: Leapsome — public Notion roadmap*
+• *AI 1:1 talking points* assigned to meeting participants (your flagged item; partly shipping as of Apr 2026).  → direct overlap with *QW 1-on-1s*.
+• *Review Assistant* auto-pulls meeting transcripts, role/level history & goal progress into the review form.  → *QW Performance Reviews*.
+• *Form Builder* for development plans / PIPs / onboarding, linked to goals & learning.  → *QW Performance + Development*.
+   https://leapsome.notion.site/leapsome/Leapsome-s-Product-Roadmap-c914ffc89c824e7db33130f3cc5bfb1f
+
+*:large_yellow_circle: PI Perform — product-page roadmap*  _(vaguer, undated)_
+• Behavioral-assessment data into *1:1 templates, feedback & goal-setting*; each report's behavioral data surfaced in the 1:1 workspace.  → *QW 1-on-1s / Feedback / Goals*.
+   https://www.predictiveindex.com/software/perform/
+
+*Takeaway:* Lattice's AI-in-1:1s + evidence-based AI reviews is the most direct pressure on QW's 1-on-1s and Reviews — the "AI talking points" idea extended into review drafting built on connected data.
+
+_No public roadmap (gated/in-app, nothing to flag): 15Five, Culture Amp, Betterworks, Engagedly, PerformYard, BambooHR; Workday Peakon's is login-gated. Roadmap items are not commitments and were gathered via search, not read off the live boards — confirm before acting._
+```
+
+---
+
+# Package Brief (audit-ready backup)
 
 ## Top Themes
 - **AI moves from feature to platform.** Cornerstone Workforce AI (May 20) and Perceptyx Develop (May 14) both launched connected AI *systems* pitching insight → skills → action — a direct challenge to QW's connected, AI-enabled platform thesis.
 - **AI embedded in the listening workflow.** Microsoft Viva Glint shipped Copilot-assisted survey commenting (GA) and is previewing Viva Insights Workplace Metrics inside Glint reporting.
-- **Performance UX overhaul at Lattice** — review experience rebuilt + large-scale calibration improvements (a single-silo deepening).
+- **Performance UX overhaul at Lattice** — review experience rebuilt + large-scale calibration (a single-silo deepening).
 - **Engagement analytics getting richer** — Lattice native org-structure filters + fresh Mercer 2025 benchmarks.
 - **Cadence note:** the enterprise suites front-loaded their big releases into **March 2026** (Workday Peakon 2026R1, Qualtrics X4, Culture Amp PCQ), which is why May looks lighter for them — not evidence they stopped shipping.
 
@@ -171,33 +202,3 @@ By package: Engagement=3 · Performance=1 · Recognition & Rewards=0 · Developm
 Most active this window: Microsoft Viva / Glint (3 items); Lattice (2 items)
 Unknown / access-limited competitors: 16
 ```
-
----
-
-# PART 3 — Roadmap Watch (forward-looking) — Performance Squad
-
-> **Purpose:** flag *upcoming/announced-but-not-GA* enhancements from competitors with **public roadmaps** that overlap QW's **Performance** package (Reviews · Goals · 1-on-1s · Feedback). These are **not** part of the shipped May report — they are lower-confidence, forward-looking signals to put on the squad's radar (e.g., the way a rival's AI 1:1 talking-points feature mirrors QW 1-on-1s).
-> **Public roadmaps found:** Lattice (seasonal release previews), Leapsome (Notion board), PI Perform (product-page roadmap). Roadmaps for 15Five, Culture Amp, Betterworks, Engagedly, PerformYard, BambooHR are gated/in-app; Workday Peakon's is customer-login-gated — nothing public to flag.
-
-## 🎯 Highest priority — Lattice (public "Spring/Summer 2026" release preview)
-Hits **1-on-1s and Reviews at the same time** — the most direct overlap with the Performance Squad:
-- **AI Agent joins 1:1s** — captures notes, surfaces coaching insights, identifies action items, syncs back into Lattice. → Direct overlap with **QW 1-on-1s**. *Top of radar.*
-- **Evidence-based AI Reviews** — AI Agent drafts a first-pass review grounded in real performance data pulled across **1:1s, past reviews, growth areas, and feedback** (manager stays accountable; AI won't auto-submit). → Overlaps **QW Performance Reviews**, and it's a *connected/cross-package* play (the differentiator QW leans on).
-- **Manager-action-oriented review experience + "My Team" high-signal dashboard** — review UI organized around what needs the manager's attention. → Overlaps QW manager review workflow (manager enablement).
-- **Lattice AI Agent moving to a persistent right-hand sidebar in H1 2026.**
-- Source: https://lattice.com/blog/lattice-spring-summer-2026-product-release
-
-## 🟡 Leapsome (public Notion roadmap)
-- **AI Copilot adds/assigns talking points to upcoming 1:1 meetings via conversational prompt** (the originally-flagged item; appears partly shipping as of April 2026 cross-module AI, with the "assign to participants" variant on the roadmap). → Direct overlap with **QW 1-on-1s**.
-- **Review Assistant auto-pulls meeting transcripts, role/level history, and goal-progress comments into the review form.** → Overlaps **QW Performance Reviews** + cross-module data.
-- **Form Builder for development plans / PIPs / onboarding, linked to goals & learning.** → Straddles **QW Performance + Development**.
-- Source: https://leapsome.notion.site/leapsome/Leapsome-s-Product-Roadmap-c914ffc89c824e7db33130f3cc5bfb1f
-
-## 🟡 PI Perform (public roadmap — vaguer, undated)
-- Roadmap: deeper integration of **behavioral-assessment data into 1:1 templates, feedback, and goal-setting**, surfacing each report's behavioral data inside the 1:1 workspace with interaction guidance. → Overlaps **QW 1-on-1s / Feedback / Goals**, with a behavioral-science angle QW lacks.
-- Source: https://www.predictiveindex.com/software/perform/
-
-## Performance Squad takeaway
-**Lattice's AI-in-1:1s + evidence-based AI Reviews is the most direct competitive pressure on QW's 1-on-1s and Reviews.** It generalizes the "AI talking points" idea into AI review drafting built on *connected* performance data — exactly the connected-platform position QW differentiates on. Watch for GA timing across Spring/Summer '26 and H1 2026.
-
-> **Caveats:** roadmap items are not commitments and may slip or change. All items here were gathered via web search (WebFetch blocked this run), not read off the live boards — confirm against the source roadmaps before acting. Forward-looking items are deliberately excluded from the Part 1/Part 2 shipped report per `CI-Prompt.md` (roadmap teasers are not material changes).
