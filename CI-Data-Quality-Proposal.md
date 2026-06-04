@@ -1,8 +1,23 @@
 # CI Data-Quality Improvement Proposal — DRAFT for review
 
-> **Status:** DRAFT · not yet adopted. Nothing in `CI-Prompt.md`, `CI-Competitor.md`, or `CI-Context.md` has been changed.
+> **Status:** PARTIALLY IMPLEMENTED (2026-06-04). The search-resilient fixes are now in `CI-Prompt.md` (v3.3) and `CI-Competitor.md` (v2.2). Email-channel and automation are **deferred** by decision (keep posting drafts here first). This doc is retained as the rationale/ADR record behind those changes.
 > **Author:** CI run (Claude Code) · **Date:** 2026-06-04 · **Prompted by:** two pages the user found by hand (15Five + Culture Amp) that the May run missed.
-> **Ask:** review the diagnosis and the proposed fixes; tell me which to implement and answer the open questions in §7.
+
+## Decision log (2026-06-04)
+1. **Unblock fetch (env):** explained — this is an environment *network-policy* setting (or running local Claude Code), not a code change. No action taken now; the workflow is hardened to degrade gracefully under the search-only constraint that exists today.
+2. **Email inbox channel:** **deferred.** Keep posting drafts in this repo; automate once we're happy with output quality.
+3. **Social listening:** **adopted within the workflow's reach** — formalized as a standing `social` lead/discovery channel using the one tool that works here (`WebSearch` against vendor LinkedIn/X + aggregators), feeding a two-pass discovery step. Never cited as a primary source.
+4. **Schema change:** **adopted** — `feed` and `social` are now first-class source *kinds*; added a `stale` flag.
+5. **Curation fixes:** **shipped** — 15Five live article ID promoted to primary (old ID retained, flagged `stale`); Culture Amp public newsfeed `updates.cultureamp.com` added as primary; both logged under Source Health.
+
+### What shipped in this PR
+- `CI-Competitor.md` v2.2: `feed`/`social` source kinds + `stale` flag; 15Five + Culture Amp source upgrades; 2026-06 Source-Health entry.
+- `CI-Prompt.md` v3.3: multi-channel listening / channel order; changelog-subdomain probe + feed discovery in Runtime Discovery; hardened search-only mode (two-pass discovery + snippet-date distrust).
+
+### Deferred (revisit after a clean run or two)
+- Dedicated email inbox read via Gmail MCP (Channel 2 below) — most robust, but set up later.
+- Any standing automation / scheduled runs.
+- Promoting verified `feed` URLs into `sources` — requires a fetch-capable run to discover and verify them first.
 
 ---
 

@@ -1,6 +1,6 @@
 # CI — Competitor File — Lean Sources + Navigation Flags
 
-> **version:** 2.1 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
+> **version:** 2.2 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
 > Track versions in git, not in the filename.
 
 Purpose
@@ -24,9 +24,12 @@ Hard rules
 - `search_required` : no reliable release notes; use constrained web search as a fallback.
 - `press` : secondary signal source (e.g., PRWeb); downgrade confidence unless corroborated.
 - `year_pinned` : URL/title is scoped to a specific year; if it doesn't match the window year, find the equivalent page(s) for the window year.
+- `stale` : known to be superseded by a better/live URL but retained for fallback or search reconciliation; prefer the sibling source flagged live.
 
 ## Source kinds (scan order hint)
-`release_notes | product_updates | help_center | docs | blog | community | roadmap | status | press`
+`feed | release_notes | product_updates | help_center | docs | blog | community | roadmap | status | press | social`
+- `feed` : a machine-readable RSS/Atom/JSON changelog feed (often exposed by hosted changelog tools like AnnounceKit/Beamer/Headway/Intercom). **Scan first** when present — it is dated, structured, one-entry-per-item, and usually survives bot-walls better than the rendered HTML. Many `product_updates` pages have a sibling feed at `/rss`, `/atom`, `feed.json`, or a `<link rel="alternate" type="application/rss+xml">` in the page head; the run discovers and verifies these (see Prompt File → Runtime discovery).
+- `social` : a vendor's LinkedIn/X presence. **Discovery/lead channel only**, never a primary citation (see Prompt File → Runtime discovery §4). Use it to learn *that* something shipped and *what it is called*, then pull the official dated doc.
 
 ---
 
@@ -39,6 +42,16 @@ Each `/ci-report` run appends/refreshes a short list of sources that were **bloc
 ```
 
 > The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
+
+### 2026-06 curation (observed 2026-06-04)
+> Triggered by two live, in-window pages found manually that the 2026-05 run missed. Root cause was the environment-wide `WebFetch` 403 (search-only mode), compounded by two source-curation gaps now corrected below. See `CI-Data-Quality-Proposal.md` for the full diagnosis.
+
+```text
+- 15Five | https://success.15five.com/hc/en-us/articles/36062624232219-What-s-New-in-15Five-Product-Releases | status: stale | observed: 2026-06-04
+  Suggested replacement (if found): https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases  (live running list, last updated 2026-05-28; PROMOTED to primary in sources)
+- Culture Amp | (public newsfeed was absent from sources) | status: replaced | observed: 2026-06-04
+  Suggested replacement (if found): https://updates.cultureamp.com  (public, no-login, dated newsfeed; PROMOTED to primary in sources)
+```
 
 ### 2026-05 run (observed 2026-06-04)
 > Environment note: this run executed where **`WebFetch` was blocked environment-wide (every fetch 403'd across unrelated domains)** — an outbound network-policy limit, not vendor bot-walls. All collection was via `WebSearch`. The URLs below could not be directly fetched; the suggested replacements are **dated, more-fetchable surfaces** discovered via search. Promote the good ones into each vendor's `sources` list. See `CI-Run-Notes-2026-05.md` for full context.
@@ -74,24 +87,41 @@ Each `/ci-report` run appends/refreshes a short list of sources that were **bloc
 
 ## Data (YAML)
 ```yaml
-version: "2.0"
+version: "2.1"
 
 competitors:
   - name: "15Five"
     aliases: ["Kona", "Emplify (acquired)", "15Five Engage", "15Five Perform"]
     website: "https://www.15five.com/"
     sources:
+      # Live running list (verified rendering 2026-06-04, last updated 2026-05-28). This article
+      # ID superseded the older 36062624232219 page, which is what search still indexes.
+      - kind: release_notes
+        url: "https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases"
+        flags: ["running_list", "ui_dynamic"]
+      # Prior article ID — retained as a fallback / for search reconciliation (may redirect or be stale).
       - kind: release_notes
         url: "https://success.15five.com/hc/en-us/articles/36062624232219-What-s-New-in-15Five-Product-Releases"
-        flags: ["running_list", "ui_dynamic"]
+        flags: ["running_list", "ui_dynamic", "stale"]
       - kind: help_center
         url: "https://success.15five.com/hc/en-us"
         flags: ["index", "ui_dynamic"]
+      # Discovery/lead only — never cite directly; use to surface feature names, then find the official doc.
+      - kind: social
+        url: "https://www.linkedin.com/products/15five/"
+        flags: ["search_required"]
 
   - name: "Culture Amp"
     aliases: []
     website: "https://www.cultureamp.com/"
     sources:
+      # PRIMARY: public product-updates newsfeed (no login). Verified 2026-06-04 — dated, chronological,
+      # category-labeled entries (e.g., "Introducing Self-Service SAML/SSO Configuration", 2026-05-14).
+      # This is Culture Amp's cleanest machine-readable surface; scan it first. Likely a hosted changelog
+      # with a sibling RSS/Atom/JSON feed — discover + verify at runtime (see Prompt File).
+      - kind: product_updates
+        url: "https://updates.cultureamp.com"
+        flags: ["running_list"]
       - kind: product_updates
         url: "https://support.cultureamp.com/en/collections/3904790-product-updates"
         flags: ["index"]
