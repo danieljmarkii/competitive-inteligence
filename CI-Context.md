@@ -1,6 +1,6 @@
 # CI — Context File
 
-> **version:** 2.0 · **owner:** Competitive Intelligence · **last updated:** 2026-06-03
+> **version:** 2.1 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
 > Track versions in git, not in the filename.
 
 This document is **ground truth** for competitive intelligence analysis related to **Quantum Workplace (QW)**.
@@ -162,5 +162,22 @@ QW is evolving from a survey-first company into a **connected, AI-enabled EX pla
 - Recognition in the flow of work sustains engagement between survey cycles
 - Insights only matter if they lead to action
 - AI should simplify leadership work, not replace judgment
+
+---
+
+## SECTION 5: CI EVALUATION LENS (HOW TO WEIGHT COMPETITOR MOVES)
+
+When judging how material a competitor change is for QW, weight it against QW's thesis — not on raw feature count. Highest-signal moves first:
+
+1. **Platform connectedness** — does the change let the competitor share data or workflows *across* engagement, performance, recognition, and development? Cross-package connection is QW's core differentiator; a rival closing that gap is high-signal.
+2. **AI layer that acts** — AI that is proactive, pattern-based, and embedded in workflows (not a descriptive dashboard or a bolt-on chatbot). QW competes on AI that simplifies leadership *action*.
+3. **Manager enablement** — does it help managers act (coach, recognize, plan, retain)? Managers are QW's primary leverage point.
+4. **Listening → action loop** — survey / sentiment signal that flows into recognition, performance, or development action, rather than ending at a report.
+5. **Trust, anonymity & data governance** — confidentiality thresholds, anonymity protections, privacy / compliance. A QW non-negotiable; competitor moves here cut both ways.
+6. **Integration depth** — shipped integrations (HRIS, Slack / Teams, SSO / SCIM) that make the platform stickier — distinct from merely announced partnerships.
+
+A move that is impressive but purely deepens a **single silo** (a better standalone survey tool, a nicer review form) is real, but carries lower strategic weight than a move that connects packages or extends the AI layer. Reflect this weighting in **Est. Impact** and in the Brief's **Strategic Signal** tag (see CI-Prompt.md).
+
+---
 
 ## END OF CONTEXT FILE
