@@ -1,6 +1,6 @@
 # CI — Competitor File — Lean Sources + Navigation Flags
 
-> **version:** 2.0 · **owner:** Competitive Intelligence · **last updated:** 2026-06-03
+> **version:** 2.1 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
 > Track versions in git, not in the filename.
 
 Purpose
@@ -40,7 +40,35 @@ Each `/ci-report` run appends/refreshes a short list of sources that were **bloc
 
 > The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
 
-*(No entries yet — first managed run will populate this.)*
+### 2026-05 run (observed 2026-06-04)
+> Environment note: this run executed where **`WebFetch` was blocked environment-wide (every fetch 403'd across unrelated domains)** — an outbound network-policy limit, not vendor bot-walls. All collection was via `WebSearch`. The URLs below could not be directly fetched; the suggested replacements are **dated, more-fetchable surfaces** discovered via search. Promote the good ones into each vendor's `sources` list. See `CI-Run-Notes-2026-05.md` for full context.
+
+```text
+- 15Five | https://success.15five.com/hc/en-us/articles/36062624232219-What-s-New-in-15Five-Product-Releases | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): (none stable — running list not machine-readable this run; help-doc edits clustered around Engagement/High Fives on 2026-05-28/29, unconfirmed)
+- Culture Amp | https://support.cultureamp.com/en/collections/17746165-2026-product-updates | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): https://www.cultureamp.com/company/newsroom
+- Lattice | https://lattice.com/product-updates | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): https://lattice.com/blog/<month>-<year>-product-updates  (dated monthly blog — stable primary; e.g. https://lattice.com/blog/may-2026-product-updates)
+- Microsoft Viva / Glint | https://techcommunity.microsoft.com/category/viva-glint/blog/viva_glint_blog | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): individual dated "News to Know" posts, e.g. https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%e2%80%93-volume-3-edition-5-may-2026/4519204
+- SurveyMonkey | https://help.surveymonkey.com/en/surveymonkey/new/ | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): https://www.surveymonkey.com/curiosity/category/product-news/  (+ https://www.surveymonkey.com/newsroom/)
+- Betterworks | https://support.betterworks.com/hc/en-us/sections/360012378232-Release-Notes | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): (none — individual dated KB articles "Release: <date>", e.g. https://support.betterworks.com/hc/en-us/articles/44556397118477-Release-March-24th-2026)
+- Qualtrics | https://community.qualtrics.com/product-release-notes-96 | status: login | observed: 2026-06-04
+  Suggested replacement (if found): weekly note pages are indexed but content login-walled, e.g. https://community.qualtrics.com/product-release-notes-96/weekly-product-release-notes-may-6-2026-33255
+- Perceptyx | https://perceptyxhelp.freshdesk.com/support/solutions/folders/63000237891 | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): https://blog.perceptyx.com  (dated product/launch posts)
+- Leapsome | https://help.leapsome.com/hc/en-us/articles/360004361834-Platform-improvements | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): https://site.leapsome.com/blog/product-updates-<month>-<year>  (dated monthly posts; e.g. .../product-updates-april-2026)
+- Paylocity | https://www.paylocity.com/company/about-us/newsroom/in-the-news/ | status: bot_blocked | observed: 2026-06-04
+  Suggested replacement (if found): https://www.paylocity.com/company/about-us/newsroom/in-the-news/whats-new-<month>-<year>/  (dated monthly blog)
+- Cornerstone OnDemand | (no curated source in file) | status: replaced | observed: 2026-06-04
+  Suggested replacement (if found): https://www.cornerstoneondemand.com/company/news-room/press-releases/
+- Workday Peakon | (no curated source in file) | status: replaced | observed: 2026-06-04
+  Suggested replacement (if found): https://doc.workday.com/en-us/peakon.html  (release dates also well-surfaced by third-party 2026R1/R2 guides)
+```
 
 ---
 
