@@ -1,6 +1,6 @@
 # CI — Competitor File — Lean Sources + Navigation Flags
 
-> **version:** 2.3 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
+> **version:** 2.4 · **owner:** Competitive Intelligence · **last updated:** 2026-07-31
 > Track versions in git, not in the filename.
 
 Purpose
@@ -42,6 +42,24 @@ Each `/ci-report` run appends/refreshes a short list of sources that were **bloc
 ```
 
 > The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
+
+### 2026-07 run (observed 2026-07-31, WebSearch-only — environment fetch block returned)
+> `WebFetch` 403'd environment-wide again this run (example.com control also 403'd) — network-policy block, NOT vendor bot-walls. Entire run executed search-only per CI-Prompt §Runtime discovery. Do **not** add `bot_blocked` flags on this run's evidence alone; re-test from a fetch-capable environment. Full details + suggested replacements in `reports/2026-07-CI-Report.md` → Source Health. Highlights:
+
+```text
+- Lattice | https://lattice.com/blog/july-2026-product-updates | status: 404 (not yet published/indexed) | observed: 2026-07-31
+  Suggested replacement (if found): https://lattice.com/product-updates/spring-summer-2026 (release hub; mixes June-shipped items)
+- Qualtrics | https://community.qualtrics.com/product-release-notes-96 | status: login | observed: 2026-07-31
+  Suggested replacement (if found): dated weekly pages, e.g. https://community.qualtrics.com/product-release-notes-96/weekly-product-release-notes-july-29-2026-33476
+- Cornerstone OnDemand | (no curated source in file) | status: replaced | observed: 2026-07-31
+  Suggested replacement (if found): https://www.cornerstoneondemand.com/company/news-room/press-releases/ + monthly release articles under /resources/article/
+- Engagedly | https://changelog.engagedly.com | status: bot_blocked | observed: 2026-07-31
+  Suggested replacement (if found): https://engagedly.com/blog/ (dated posts; carried the 2026-07-14 Energage merger announcement)
+- Betterworks | https://support.betterworks.com/hc/en-us/sections/360012378232-Release-Notes | status: bot_blocked (env) | observed: 2026-07-31
+  Suggested replacement (if found): dated release articles, e.g. https://support.betterworks.com/hc/en-us/articles/47375805538573-Release-July-14th-2026 ; press page https://www.betterworks.com/press
+- SurveyMonkey | https://help.surveymonkey.com/en/surveymonkey/new/ | status: bot_blocked (env) | observed: 2026-07-31
+  Suggested replacement (if found): https://www.surveymonkey.com/product/features/whats-new/ (undated — discovery only) + https://www.surveymonkey.com/newsroom/
+```
 
 ### 2026-05 re-run (observed 2026-06-04, full run, WebFetch restored)
 > Clean re-run of the May 2026 window now that `WebFetch` works again (every fetch had 403'd in the original 2026-05 run). Direct fetch succeeded for Lattice, Predictive Index, Culture Amp, 15Five; `WebSearch` filled the rest. Remaining failures are vendor-side bot-walls / JS-only changelogs, not an environment block — apply the route-around playbook (CI-Prompt §Runtime discovery) before promoting any replacement.
