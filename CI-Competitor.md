@@ -1,6 +1,6 @@
 # CI — Competitor File — Lean Sources + Navigation Flags
 
-> **version:** 2.3 · **owner:** Competitive Intelligence · **last updated:** 2026-06-04
+> **version:** 2.4 · **owner:** Competitive Intelligence · **last updated:** 2026-08-03
 > Track versions in git, not in the filename.
 
 Purpose
@@ -42,6 +42,41 @@ Each `/ci-report` run appends/refreshes a short list of sources that were **bloc
 ```
 
 > The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
+
+### 2026-07 run (observed 2026-08-03, full run)
+> `WebFetch` live all run. Direct fetch clean for Culture Amp, 15Five, Predictive Index, Perceptyx (blog), Engagedly (blog), Leapsome (blog), Lattice hub. `WebSearch` route-arounds recovered Betterworks, Qualtrics, Viva Glint, Paylocity, BambooHR, Cornerstone. **Environment note: `web.archive.org` is unreachable from this environment — the Wayback route-around is unavailable; snippet-recovery is the working fallback for hard 403s.** Full detail in `reports/2026-07-CI-Report.md` → Source Health.
+
+```text
+VERIFIED-GOOD primaries this run (keep):
+- Culture Amp | https://updates.cultureamp.com | fetched clean, dated (newest 2026-07-24)
+- 15Five | https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases | fetched clean, dated (updated 2026-07-24)
+- Predictive Index | https://docs.predictiveindex.com/en/collections/12282995-release-notes | fetched clean, dated
+- Perceptyx | https://blog.perceptyx.com | fetched clean, dated — better than the bot-walled Freshdesk folder
+
+Blocked / stale / gaps this run:
+- Betterworks | https://support.betterworks.com/hc/en-us/articles/47375805538573-Release-July-14th-2026 | status: bot_blocked | observed: 2026-08-03
+  Suggested replacement (if found): none stable — section Atom feed also 403s; content recovered via search-indexed snippets
+- Microsoft Viva / Glint | https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%E2%80%93-volume-3-edition-7-july-2026/4532463 | status: bot_blocked | observed: 2026-08-03
+  Suggested replacement (if found): none — title renders, body doesn't; recovered via WebSearch (same as 2026-05)
+- Qualtrics | https://community.qualtrics.com/product-release-notes-96 | status: login | observed: 2026-08-03
+  Suggested replacement (if found): weekly note pages indexed with rich snippets, e.g. .../weekly-product-release-notes-july-22-2026-33475
+- Leapsome | https://site.leapsome.com/blog/product-updates-<mon>-<year> (pattern) | status: stale | observed: 2026-08-03
+  Suggested replacement (if found): monthly-roundup slugs appear discontinued (jul-2026/july-2026 both 404) — treat https://site.leapsome.com/blog as the index; July launch post: https://site.leapsome.com/blog/leapsome-ai-people-data-foundation
+- Lattice | https://lattice.com/blog/july-2026-product-updates | status: 404 | observed: 2026-08-03
+  Suggested replacement (if found): not a wall — July roundup not yet published at run date; hub fetched clean. Recheck mid-August.
+- Workday Peakon | https://doc.workday.com/peakon/en-us/workday-peakon-employee-voice/product-updates/release-notes/2026.html | status: bot_blocked (JS-empty) | observed: 2026-08-03
+  Suggested replacement (if found): month child pages resolve when published (e.g. .../2026/june/wednesday--10th-june.html); July pages 404 — likely not yet published
+- SurveyMonkey | https://help.surveymonkey.com/en/surveymonkey/new/release-notes/ | status: stale (newest entry 2026-02) | observed: 2026-08-03
+  Suggested replacement (if found): https://www.surveymonkey.com/product/features/whats-new/ (live seasonal roundup, undated per-item — pair with newsroom for dates)
+- Officevibe (Workleap) | https://help.workleap.com/en/ | status: replaced | observed: 2026-08-03
+  Suggested replacement (if found): still none — no live Workleap what's-new surface found; curation gap persists
+- Engagedly | https://changelog.engagedly.com | status: bot_blocked | observed: 2026-08-03
+  Suggested replacement (if found): https://engagedly.com/blog/ (dated corporate posts fetch clean)
+- Paylocity | https://www.paylocity.com/company/about-us/newsroom/in-the-news/whats-new-july-2026/ | status: bot_blocked (JS-empty) | observed: 2026-08-03
+  Suggested replacement (if found): dated press releases fetch clean, e.g. .../press-releases/paylocity-launches-ignite-ai-redefining-industry-ai-leadership/
+- Cornerstone OnDemand | (no curated source in file) | status: replaced | observed: 2026-08-03
+  Suggested replacement (if found): https://www.cornerstoneondemand.com/resources/topics/cornerstone-news/ (dated release articles)
+```
 
 ### 2026-05 re-run (observed 2026-06-04, full run, WebFetch restored)
 > Clean re-run of the May 2026 window now that `WebFetch` works again (every fetch had 403'd in the original 2026-05 run). Direct fetch succeeded for Lattice, Predictive Index, Culture Amp, 15Five; `WebSearch` filled the rest. Remaining failures are vendor-side bot-walls / JS-only changelogs, not an environment block — apply the route-around playbook (CI-Prompt §Runtime discovery) before promoting any replacement.
