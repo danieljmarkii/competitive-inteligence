@@ -244,7 +244,54 @@ Across all vendors, automated rollover/carry-forward of incomplete goals into th
 ### 5.5 Manager enablement (CI-Context §5.3)
 Cycle constructs are doing manager work at Leapsome (approve-reminders before drafting ends), Lattice (role-targeted cycle launch emails + per-level homepage tasks), and Betterworks (program emails chasing goal-less employees; matrix-manager goal views 2026-05-19). PI Perform's auto meeting topics put goal updates directly into the manager's existing ritual. Culture Amp's zero-notification goals leave managers unsupported between reviews.
 
-### 5.6 Recency / shipping velocity on goals (descriptive)
+### 5.6 Notification patterns across goal cycles (added 2026-08-10, follow-up pass)
+
+Mapped across the cycle lifecycle. Frequency counts are out of the six deepest goal vendors (Lattice, Leapsome, Betterworks, 15Five, Culture Amp, Engagedly); Engagedly is Unknown throughout (no notification docs found).
+
+**1. Recurring progress-update reminders — the most common notification (4 of 6 verified).**
+- Lattice: admin-set cadence (weekly / bi-weekly / monthly / quarterly / never), sent Thursdays ~10:00 local, targeted only at owners of goals without recent updates; a homepage task appears after 2 weeks without updates even on "Never." Channels: email, Slack, home task.
+- Leapsome: "Goal Update digest & reminder" notifications, admin-enabled with user-level adjustment; email and/or Slack.
+- Betterworks: goal check-in reminder emails plus a marketing-claimed Slack nudge when an OKR drifts 10% off track (threshold-triggered, not time-triggered — unique in this set).
+- 15Five: structural rather than notification-based — objectives sit at the top of every weekly Check-in, so the update prompt is embedded in the existing ritual (PI Perform does the analogous thing via auto-created meeting discussion topics).
+- Culture Amp: none. Sources: https://help.lattice.com/hc/en-us/articles/1500001419661 · https://help.lattice.com/hc/en-us/articles/14664105127447 · https://support.betterworks.com/hc/en-us/articles/360002018731 · https://help.leapsome.com/hc/en-us/articles/360018883498
+
+**2. Cycle-open / goal-setting launch prompts (3 of 6 — every vendor with a real cycle or period construct).**
+- Lattice: per-cycle launch emails targeted separately at company goal creators, department goal creators, and all employees, with custom subject/body, scheduled send date/time/timezone, and self-preview; plus per-level homepage tasks. The most configurable launch flow found.
+- Leapsome: drafting-start notification to all cycle participants (email/Slack), fixed timing.
+- Betterworks: "Program Emails" on an admin-set timeline (ad-hoc sends available; weekends skipped). Sources: https://help.lattice.com/hc/en-us/articles/37846784374807 · https://help.leapsome.com/hc/en-us/articles/360003224378 · https://support.betterworks.com/hc/en-us/articles/14972512005517
+
+**3. Non-participation chasers — "you haven't set goals yet" (2 of 6 verified).**
+- Leapsome: 7 days before drafting ends, users without goals are reminded.
+- Betterworks: program emails specifically target employees who haven't created goals for the period.
+- Lattice: persistent homepage tasks serve this role; a dedicated chaser email is not documented.
+
+**4. Pre-close / mid-period update pushes (3 of 6).**
+- Lattice: closing-cycle notification prompting everyone to update and end goals.
+- Leapsome: 7 days before the active phase ends, admins + all participants are prompted to update.
+- Betterworks: mid-period update notification email.
+
+**5. Close / end-state notifications (mixed mechanisms).**
+- 15Five: follower emails on close ("An objective you are following has been closed") and on deletion.
+- Betterworks: overdue-goal notifications; Goal Locking silently freezes (lock itself is enforcement, not a notification).
+- Lattice: goals flip to an Overdue flag; the closing-cycle email is the prompt.
+- Leapsome: auto-archive at cycle end is the terminal event; the -7-day notice is the warning.
+
+**6. Manager-side notifications (3 of 6).**
+- Lattice: Goal Digest email (manager rollup of direct-report goal updates, cadence-following) plus an opt-in "notify managers when direct report goals are updated."
+- Leapsome: manager approval reminders 7 days before drafting ends — the only approval-prompt notification in the set.
+- Betterworks: weekly digest of goal activity.
+
+**7. Social/event notifications (3 of 6).**
+- Lattice: comment posted, update liked, co-owner posted an update, added-as-owner — all to goal owners, non-configurable (email, Slack).
+- 15Five: owner notified on new follower; followers notified on close/delete.
+- Betterworks: user-to-user cheer/nudge on goals.
+- Culture Amp: explicitly none — no update, comment, or permission-assignment notifications; emails "hoped for" with no date.
+
+**Channels.** Email is universal where notifications exist; Slack is near-standard (Lattice, Leapsome, Betterworks NextGen as of 2026-06-30, 15Five); MS Teams verified at Betterworks; SMS only at 15Five; homepage/task-inbox surfaces at Lattice; meeting-agenda injection at PI Perform. 15Five's admin model is notable: per-notification control assignable to Company (admin-locked), User (individual choice), or 15Five (platform-managed). Source: https://success.15five.com/hc/en-us/articles/50988724271643
+
+**Reading (labeled inference).** The de-facto standard notification set for a goal-cycles feature is: role-targeted launch → non-participation chaser → recurring update reminder (configurable cadence, targeted at stale goals only) → pre-close push → close/archive notice → manager digest, over email + Slack with admin config and user-level overrides. Nobody notifies on the cycle-to-cycle transition (consistent with the rollover whitespace in §5.2), and threshold/AI-triggered nudges (vs. calendar-triggered) exist only as Betterworks' drift claim — both open ground.
+
+### 5.7 Recency / shipping velocity on goals (descriptive)
 Culture Amp shipped the most dated goal items in the window (steady 2025–2026 stream, headlined by Cascading Goals 2026-05-05 + weighting 2026-06-30) — but mostly reporting/admin depth, not cycle machinery. Lattice ran a four-milestone Goals Refresh (2025-07 → 2026-02) then pivoted to API/MCP. Betterworks' 2026 releases are goals-heavy (May Spring Release onward). 15Five's goal items are steady but incremental (weights, visibility). Leapsome's May–Jul 2026 changes are uncovered (source gap — see Source Health), so its velocity read is incomplete.
 
 ---
