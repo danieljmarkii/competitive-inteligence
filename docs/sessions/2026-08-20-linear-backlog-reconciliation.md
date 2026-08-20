@@ -5,7 +5,7 @@
 **Skipped by instruction:** CUL-98 / CUL-293 (shipped 2026-08-20 via #685/#686) and the five Quick Wins closed that day (CUL-133/151/84/92/446).
 **Method:** four parallel read-only verification passes over the `project-nyx` clone (full history, all branches) + the squash-merge ledger (`main` @ #686, 2026-08-19) + `docs/sessions/` records + Linear. Every Done-close below was spot-checked in the main loop against the ledger and the cited file:line before the status was changed. Lens: Product Owner / Backlog Steward (`docs/personas.md`); procedure: `.claude/skills/backlog-groomer`.
 
-> **Note on location:** this session ran from the `competitive-inteligence` repo (its designated branch; a push-capable attach of project-nyx was declined by the permission layer). The canonical home for session records is `project-nyx/docs/sessions/` — copy this file there on the next project-nyx docs PR.
+> **Note on location:** this record's canonical home is here, `project-nyx/docs/sessions/`. It was first drafted from the `competitive-inteligence` repo (that session's designated branch — PR #12 there, closed in favor of this one) because the initial project-nyx attach was declined; the PM redirected it here the same day.
 
 ## Board shape, verified 2026-08-20
 
@@ -198,3 +198,28 @@ CUL-157's title is a full paragraph (the NARROWED ruling text) — retitle to th
 - Parked-In-Progress recommended → Todo: 18. Engineering-complete-awaiting-one-step: 12 listed for a PM convention.
 - Dedup candidates flagged: 7 clusters. Archive candidates for PM ruling: ≈35 across 6 groups.
 - Genuinely-open Urgent/High shortlist: 22 entries, tagged {engineering 9 · decision 6 · designer 3 · pm-action 5}, with the two redeploys called out as the cheapest unlock.
+
+---
+
+## ADDENDUM — PM rulings applied, same day (2026-08-20)
+
+The PM ruled on the three recommendation groups; all applied in Linear with a trail comment on every touched issue.
+
+**Ruling 1 — parked In-Progress → Backlog (18 moved).** The PM chose the `Backlog` state (holding pen) over the recommended Todo: CUL-522, CUL-50, CUL-140, CUL-358, CUL-353, CUL-399, CUL-244, CUL-411, CUL-376, CUL-317, CUL-222, CUL-144, CUL-141, CUL-103, CUL-101, CUL-91, CUL-65, CUL-38. Each carries a "looks parked since \<date\>" comment with its evidence. (CUL-141 remains near-closable — ruling PR 7 out of scope would close it.)
+
+**Ruling 2 — "Waiting on PM" convention created.** New team label **`Waiting on PM`** ("engineering-complete; one named PM/device/decision step remains"). Applied to **10** issues, each with a comment naming its single remaining step: CUL-44 (Auth-dashboard toggle) · CUL-43 (deep-link device pass) · CUL-39 (icon render check) · CUL-68 (TestFlight cut + device pass) · CUL-64 (B-494 redeploy = CUL-19) · CUL-188 (live demo seed) · CUL-173 (subtitle + ASC uploads) · CUL-179 (Dr. Chen D2 ratification) · CUL-425 (squash-only settings flip) · CUL-51 (Dr. Chen rulings + mock round). The PM sweeps this label view and closes/updates each. **Two of the twelve were excluded after checking live state:** the App Store Launch project (created earlier today, PR #687) gave **CUL-70** (the "Early access" rename slice, M1) and **CUL-219** (the four auth email templates, M2) fresh engineering scope — both corrected in-thread and left unlabeled.
+
+**Ruling 3 — tail archive (22 canceled-as-archived).** Linear's API has no archive verb, so these went to `Canceled` with a per-issue reason; they auto-archive from there and restore in one click:
+- A · Linear boilerplate (4): CUL-1, CUL-2, CUL-3, CUL-4.
+- B · superseded by the migration (3): CUL-431, CUL-404, CUL-263.
+- D · accepted-decision / awareness-only records (5): CUL-89, CUL-482, CUL-395, CUL-87, CUL-183.
+- E · someday-maybe, no current path (7): CUL-220, CUL-210, CUL-201, CUL-507, CUL-110, CUL-469, CUL-427.
+- F · periodic chores (3): CUL-256, CUL-233, CUL-268 — noted as belonging with the recurring competitive-intelligence workflow / a scheduled Routine.
+
+**Held back from ruling 3, deliberately:**
+- **CUL-465** — pulled from the cancel list at the last check: the App Store Launch project adopted it into **M6 · Review week + post-launch fence** two hours before this pass ran. Don't disturb.
+- **Group C (12 decision rows)** — CUL-267, 247, 413, 272, 90, 334, 361, 420, 448, 456, 145, 86: these are *open decisions*, not stale work; the record recommended moving them to the decision register / Open Questions, not archiving. Archiving would hide pending rulings, so they stay Todo pending an explicit call (say the word and they get the same treatment, or a decision-register migration).
+- **CUL-410** (needs its 2-minute re-read first) and the two borderline keeps **CUL-269 / CUL-85** (keep-if-roadmap).
+- **Dedup clusters** — still recommendations only; nothing merged or marked duplicate.
+
+**Net effect on the board:** In Progress 40 → 16 (3 active · 1 unclear CUL-83 · 10 Waiting-on-PM · CUL-70 + CUL-219 re-scoped by the launch project); Todo −24 (2 closed, 22 archived); Backlog +18; Done +8. (Absolute totals shifted further the same day by the App Store Launch project's own new issues — deltas here are this pass's only.)
