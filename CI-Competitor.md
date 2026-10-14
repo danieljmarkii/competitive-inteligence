@@ -1,182 +1,95 @@
-# CI — Competitor File — Lean Sources + Navigation Flags
+# CI — Competitor File — Source Registry (routes, flags, verification)
 
-> **version:** 2.4 · **owner:** Competitive Intelligence · **last updated:** 2026-08-03
-> Track versions in git, not in the filename.
+> **version:** 3.0 · **owner:** Competitive Intelligence · **last updated:** 2026-10-13
+> Track versions in git, not in the filename. Read by `/ci-report` and by `tools/ci_sources.py`.
+> **v3.0 (2026-10-13):** every source now records the access `route` that works and the date a run last `verified` it; competitors can carry a `news_query`. The 2026-09 run re-verified the registry, promoted or closed five months of unactioned Source Health suggestions (archived in `reports/source-health-archive-2026-05-to-07.md`), and moved this file to self-curation.
 
 Purpose
-- Canonical competitor list (names + aliases) and **starting** source URLs to monitor for product changes.
-- This file is **data**, not methodology. Global crawling/navigation/discovery rules live in the Prompt File.
-- URLs here are a *starting point*, not a closed set. When a source is blocked or stale, the Prompt File's runtime discovery procedure finds a live equivalent and the run flags it back here (see "Source health" below).
+- Canonical competitor list (names + aliases) and the **sources** each run reads, each with the route proven to read it.
+- This file is **data**, not methodology. How to collect, the Access Playbook, and the curation rules live in `CI-Prompt.md`.
+- Sources are a *starting point*, not a closed set. Each run curates this file itself, in the open: promote / re-route / demote with evidence, list every change in the report's Workflow Retro, ship it on the run's PR (`CI-Prompt.md` → RUN RETRO & SELF-CURATION).
 
 Hard rules
 - Do **not** invent competitors outside this file.
 - Use the **name** field as the canonical vendor name.
-- All URLs must be plain https.
+- All URLs must be plain https. Never add a URL a run did not verify.
 
 ---
+
+## Fields
+Per competitor: `name`, `aliases`, `website`, `sources`, optional `news_query` (Google News query for `collect --news`; disambiguates generic names).
+
+Per source:
+- `kind` : what the surface is (see Source kinds).
+- `url` : plain https. With `route: monthly_url`, a template using `{month}` `{mon}` `{mm}` `{year}` (e.g. `.../{month}-{year}-product-updates`).
+- `route` : how to read it; default `html`. One of `html` (GET, Wayback fallback) · `monthly_url` · `zendesk_section` · `zendesk_recent` · `zendesk_article` (public Help Center JSON API; works where `/hc/` HTML 403s) · `intercom_news` · `rss` · `wp_json` · `sitemap` · `dated_links` (listings whose links carry dates: Cision newsrooms, AEM doc nav trees). Implemented in `tools/ci_sources.py`; when to use each is in `CI-Prompt.md` → Access Playbook.
+- `flags` : behavior hints (legend below).
+- `cite` : optional human-facing URL to cite when `url` is a machine endpoint (e.g. a JSON API behind a public page).
+- `verified` : last date a run read useful content through the route (dated, unless flagged `undated`). Absent on sources known to be blocked: they stay listed so the check keeps reporting the wall.
 
 ## Flags (source behavior hints)
 - `index` : the URL is a hub/listing; you must open child pages in-window.
 - `running_list` : a single long page with many dated entries/sections; find month headers and extract in-window.
 - `ui_dynamic` : content often hides behind tabs/accordions; avoid click-reliance (prefer text extraction + find).
-- `login` : likely requires authentication; if blocked, record Access limits and do not claim "no notable changes."
-- `bot_blocked` : known to block automated fetches (403/429/captcha/JS-wall). Trigger runtime discovery; do not treat as "no changes."
-- `search_required` : no reliable release notes; use constrained web search as a fallback.
-- `press` : secondary signal source (e.g., PRWeb); downgrade confidence unless corroborated.
+- `login` : requires authentication; never bypass. Record Access limits and do not claim "no notable changes."
+- `bot_blocked` : blocks automated fetches (403/429/captcha/JS-wall) on its HTML. Use the source's `route` or the Access Playbook; do not treat as "no changes."
+- `search_required` : no reliable dated surface; use constrained web search / the press sweep.
+- `press` : secondary signal source; downgrade confidence unless corroborated.
 - `year_pinned` : URL/title is scoped to a specific year; if it doesn't match the window year, find the equivalent page(s) for the window year.
-- `stale` : known to be superseded by a better/live URL but retained for fallback or search reconciliation; prefer the sibling source flagged live.
+- `stale` : superseded or no longer updated; retained only for fallback or search reconciliation.
+- `undated` : live, but entries carry no per-item dates; pair with a dated surface before citing a date.
 
 ## Source kinds (scan order hint)
-`feed | release_notes | product_updates | help_center | docs | blog | community | roadmap | status | press | social`
-- `feed` : a machine-readable RSS/Atom/JSON changelog feed (often exposed by hosted changelog tools like AnnounceKit/Beamer/Headway/Intercom). **Scan first** when present — it is dated, structured, one-entry-per-item, and usually survives bot-walls better than the rendered HTML. Many `product_updates` pages have a sibling feed at `/rss`, `/atom`, `feed.json`, or a `<link rel="alternate" type="application/rss+xml">` in the page head; the run discovers and verifies these (see Prompt File → Runtime discovery).
-- `social` : a vendor's LinkedIn/X presence. **Discovery/lead channel only**, never a primary citation (see Prompt File → Runtime discovery §4). Use it to learn *that* something shipped and *what it is called*, then pull the official dated doc.
+`feed | release_notes | product_updates | help_center | docs | blog | community | newsroom | roadmap | status | press | aggregator | social`
+- `feed` : a machine-readable RSS/Atom/JSON feed. **Scan first** when present: dated, one entry per item, and it usually survives bot-walls.
+- `newsroom` : the vendor's own dated press releases. Best surface for vendors without a public changelog (HCM suites).
+- `aggregator` : a third-party changelog aggregator (e.g. Releasebot). Discovery only: it reveals dated items and URL migrations, but cite the vendor's official page.
+- `social` : LinkedIn/X. **Discovery/lead channel only**, never fetched as a source or cited as primary (see `CI-Prompt.md` → Runtime discovery §4).
 
 ---
 
-## Source health (maintained by the monthly run)
-Each `/ci-report` run appends/refreshes a short list of sources that were **blocked, stale, or replaced**, so URLs can be curated over time instead of all at once. Format:
+## Open source issues (start the next run here)
+Unresolved gaps only; each run rewrites this list. Run-by-run history lives in each `reports/<YYYY-MM>-CI-Report.md` (Source Health + Workflow Retro); 2026-05 to 2026-07 logs are archived in `reports/source-health-archive-2026-05-to-07.md`.
 
 ```text
-- <Competitor> | <url> | status: <bot_blocked|404|stale|replaced> | observed: YYYY-MM-DD
-  Suggested replacement (if found): <url>
-```
-
-> The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
-
-### 2026-07 run (observed 2026-08-03, full run)
-> `WebFetch` live all run. Direct fetch clean for Culture Amp, 15Five, Predictive Index, Perceptyx (blog), Engagedly (blog), Leapsome (blog), Lattice hub. `WebSearch` route-arounds recovered Betterworks, Qualtrics, Viva Glint, Paylocity, BambooHR, Cornerstone. **Environment note: `web.archive.org` is unreachable from this environment — the Wayback route-around is unavailable; snippet-recovery is the working fallback for hard 403s.** Full detail in `reports/2026-07-CI-Report.md` → Source Health.
-
-```text
-VERIFIED-GOOD primaries this run (keep):
-- Culture Amp | https://updates.cultureamp.com | fetched clean, dated (newest 2026-07-24)
-- 15Five | https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases | fetched clean, dated (updated 2026-07-24)
-- Predictive Index | https://docs.predictiveindex.com/en/collections/12282995-release-notes | fetched clean, dated
-- Perceptyx | https://blog.perceptyx.com | fetched clean, dated — better than the bot-walled Freshdesk folder
-
-Blocked / stale / gaps this run:
-- Betterworks | https://support.betterworks.com/hc/en-us/articles/47375805538573-Release-July-14th-2026 | status: bot_blocked | observed: 2026-08-03
-  Suggested replacement (if found): none stable — section Atom feed also 403s; content recovered via search-indexed snippets
-- Microsoft Viva / Glint | https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%E2%80%93-volume-3-edition-7-july-2026/4532463 | status: bot_blocked | observed: 2026-08-03
-  Suggested replacement (if found): none — title renders, body doesn't; recovered via WebSearch (same as 2026-05)
-- Qualtrics | https://community.qualtrics.com/product-release-notes-96 | status: login | observed: 2026-08-03
-  Suggested replacement (if found): weekly note pages indexed with rich snippets, e.g. .../weekly-product-release-notes-july-22-2026-33475
-- Leapsome | https://site.leapsome.com/blog/product-updates-<mon>-<year> (pattern) | status: stale | observed: 2026-08-03
-  Suggested replacement (if found): monthly-roundup slugs appear discontinued (jul-2026/july-2026 both 404) — treat https://site.leapsome.com/blog as the index; July launch post: https://site.leapsome.com/blog/leapsome-ai-people-data-foundation
-- Lattice | https://lattice.com/blog/july-2026-product-updates | status: 404 | observed: 2026-08-03
-  Suggested replacement (if found): not a wall — July roundup not yet published at run date; hub fetched clean. Recheck mid-August.
-- Workday Peakon | https://doc.workday.com/peakon/en-us/workday-peakon-employee-voice/product-updates/release-notes/2026.html | status: bot_blocked (JS-empty) | observed: 2026-08-03
-  Suggested replacement (if found): month child pages resolve when published (e.g. .../2026/june/wednesday--10th-june.html); July pages 404 — likely not yet published
-- SurveyMonkey | https://help.surveymonkey.com/en/surveymonkey/new/release-notes/ | status: stale (newest entry 2026-02) | observed: 2026-08-03
-  Suggested replacement (if found): https://www.surveymonkey.com/product/features/whats-new/ (live seasonal roundup, undated per-item — pair with newsroom for dates)
-- Officevibe (Workleap) | https://help.workleap.com/en/ | status: replaced | observed: 2026-08-03
-  Suggested replacement (if found): still none — no live Workleap what's-new surface found; curation gap persists
-- Engagedly | https://changelog.engagedly.com | status: bot_blocked | observed: 2026-08-03
-  Suggested replacement (if found): https://engagedly.com/blog/ (dated corporate posts fetch clean)
-- Paylocity | https://www.paylocity.com/company/about-us/newsroom/in-the-news/whats-new-july-2026/ | status: bot_blocked (JS-empty) | observed: 2026-08-03
-  Suggested replacement (if found): dated press releases fetch clean, e.g. .../press-releases/paylocity-launches-ignite-ai-redefining-industry-ai-leadership/
-- Cornerstone OnDemand | (no curated source in file) | status: replaced | observed: 2026-08-03
-  Suggested replacement (if found): https://www.cornerstoneondemand.com/resources/topics/cornerstone-news/ (dated release articles)
-```
-
-### 2026-05 re-run (observed 2026-06-04, full run, WebFetch restored)
-> Clean re-run of the May 2026 window now that `WebFetch` works again (every fetch had 403'd in the original 2026-05 run). Direct fetch succeeded for Lattice, Predictive Index, Culture Amp, 15Five; `WebSearch` filled the rest. Remaining failures are vendor-side bot-walls / JS-only changelogs, not an environment block — apply the route-around playbook (CI-Prompt §Runtime discovery) before promoting any replacement.
-
-```text
-VERIFIED-GOOD primaries this run (promote/keep):
-- Lattice | https://lattice.com/blog/<month>-<year>-product-updates | dated monthly roundup, fetched clean (e.g. .../may-2026-product-updates)
-- Predictive Index | https://docs.predictiveindex.com/en/collections/12282995-release-notes | dated entries, fetched clean
-- 15Five | https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases | fetched clean, dated
-- Culture Amp | https://updates.cultureamp.com | fetched clean, dated (no public RSS — see feed-verification note)
-
-Blocked / stale this run (try Wayback + section Atom feed before declaring Unknown):
-- Betterworks | https://support.betterworks.com/hc/en-us/sections/360012378232-Release-Notes | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): individual dated KB "Release: <date>" articles; section Atom feed .../sections/360012378232/articles.atom
-- BambooHR | https://www.bamboohr.com/product-updates/ | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): per-feature child pages, e.g. https://www.bamboohr.com/product-updates/embedded-eor-offboarding (find the On-Demand Pay child, shipped 2026-05-11)
-- Leapsome | https://help.leapsome.com/hc/en-us/articles/360004361834-Platform-improvements | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): https://site.leapsome.com/blog/product-updates-<mon>-<year> (verified live: .../product-updates-mar-2026; may-2026 slug 404'd)
-- Officevibe (Workleap) | https://help.workleap.com/en/ | status: replaced | observed: 2026-06-04
-  Suggested replacement (if found): (changelog.workleap.com does NOT resolve — locate Workleap's real what's-new surface)
-- Engagedly | https://changelog.engagedly.com | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): JS-only hosted changelog — find its JSON/RSS backend (AnnounceKit/Beamer/Headway)
-- Microsoft Viva / Glint | https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%e2%80%93-volume-3-edition-5-may-2026/4519204 | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): (title renders, body does not via WebFetch; content recovered via WebSearch — fetch partial)
-- Qualtrics | https://community.qualtrics.com/product-release-notes-96 | status: login | observed: 2026-06-04
-  Suggested replacement (if found): weekly note pages indexed but login-walled, e.g. .../weekly-product-release-notes-may-6-2026-33255
-- SurveyMonkey | https://www.surveymonkey.com/curiosity/category/product-news/ | status: stale | observed: 2026-06-04
-  Suggested replacement (if found): page lists posts but no per-post dates in HTML-to-text — needs a dated surface
-```
-
-### 2026-06 feed verification (observed 2026-06-04)
-> **`WebFetch` now works in this environment** — `example.com` and both vendor pages fetched clean (200), reversing the environment-wide 403 the 2026-05 run hit. Re-verified the May 2026 items and hunted for RSS/changelog feeds for both promoted primaries. **Result: neither vendor exposes a public feed — there is no `feed`-kind URL to promote for either.**
->
-> - **15Five** (`success.15five.com`, Zendesk Help Center): the "What's new" running list is a *single Zendesk article* (`50989471559067`), not a section/blog, so it has no syndication feed. Probes 404'd / served HTML: `…/50989471559067.atom`, `/hc/en-us/sections.atom`. Page "last updated 2026-05-29 03:56." May 2026 items verified on-page: Custom Automated Review Schedules (05-20), Manager Display Name Customization (05-19), HRIS Sync 2.0 (05-14), Download All Survey Results as Zip (05-05). ⚠️ Date discrepancy: search still indexes the *stale* article dating HRIS Sync 2.0 to "April 29" — the live running list (authoritative) says "Released May 14th." Trust the live page.
-> - **Culture Amp** (`updates.cultureamp.com`, Intercom News): no public RSS/Atom/JSON feed exists (Intercom News uses RSS only as an API input, not output). Probes 404'd: `/rss`, `/feed`, `/feed.rss`; no `<link rel="alternate">` in the page head. The newsfeed page is itself the machine-readable surface. May 2026 items verified on-page: Self-Service SAML/SSO (05-14), Scoped Surveys (Limited) Role (05-06), Cascading Goals (05-05). (June 01 SAML "all accounts" item is out of the May window.)
-
-### 2026-06 curation (observed 2026-06-04)
-> Triggered by two live, in-window pages found manually that the 2026-05 run missed. Root cause was the environment-wide `WebFetch` 403 (search-only mode), compounded by two source-curation gaps now corrected below. See `CI-Data-Quality-Proposal.md` for the full diagnosis.
-
-```text
-- 15Five | https://success.15five.com/hc/en-us/articles/36062624232219-What-s-New-in-15Five-Product-Releases | status: stale | observed: 2026-06-04
-  Suggested replacement (if found): https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases  (live running list, last updated 2026-05-28; PROMOTED to primary in sources)
-- Culture Amp | (public newsfeed was absent from sources) | status: replaced | observed: 2026-06-04
-  Suggested replacement (if found): https://updates.cultureamp.com  (public, no-login, dated newsfeed; PROMOTED to primary in sources)
-```
-
-### 2026-05 run (observed 2026-06-04)
-> Environment note: this run executed where **`WebFetch` was blocked environment-wide (every fetch 403'd across unrelated domains)** — an outbound network-policy limit, not vendor bot-walls. All collection was via `WebSearch`. The URLs below could not be directly fetched; the suggested replacements are **dated, more-fetchable surfaces** discovered via search. Promote the good ones into each vendor's `sources` list. See `CI-Run-Notes-2026-05.md` for full context.
-
-```text
-- 15Five | https://success.15five.com/hc/en-us/articles/36062624232219-What-s-New-in-15Five-Product-Releases | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): (none stable — running list not machine-readable this run; help-doc edits clustered around Engagement/High Fives on 2026-05-28/29, unconfirmed)
-- Culture Amp | https://support.cultureamp.com/en/collections/17746165-2026-product-updates | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): https://www.cultureamp.com/company/newsroom
-- Lattice | https://lattice.com/product-updates | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): https://lattice.com/blog/<month>-<year>-product-updates  (dated monthly blog — stable primary; e.g. https://lattice.com/blog/may-2026-product-updates)
-- Microsoft Viva / Glint | https://techcommunity.microsoft.com/category/viva-glint/blog/viva_glint_blog | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): individual dated "News to Know" posts, e.g. https://techcommunity.microsoft.com/blog/viva_glint_blog/news-to-know-%e2%80%93-volume-3-edition-5-may-2026/4519204
-- SurveyMonkey | https://help.surveymonkey.com/en/surveymonkey/new/ | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): https://www.surveymonkey.com/curiosity/category/product-news/  (+ https://www.surveymonkey.com/newsroom/)
-- Betterworks | https://support.betterworks.com/hc/en-us/sections/360012378232-Release-Notes | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): (none — individual dated KB articles "Release: <date>", e.g. https://support.betterworks.com/hc/en-us/articles/44556397118477-Release-March-24th-2026)
-- Qualtrics | https://community.qualtrics.com/product-release-notes-96 | status: login | observed: 2026-06-04
-  Suggested replacement (if found): weekly note pages are indexed but content login-walled, e.g. https://community.qualtrics.com/product-release-notes-96/weekly-product-release-notes-may-6-2026-33255
-- Perceptyx | https://perceptyxhelp.freshdesk.com/support/solutions/folders/63000237891 | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): https://blog.perceptyx.com  (dated product/launch posts)
-- Leapsome | https://help.leapsome.com/hc/en-us/articles/360004361834-Platform-improvements | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): https://site.leapsome.com/blog/product-updates-<month>-<year>  (dated monthly posts; e.g. .../product-updates-april-2026)
-- Paylocity | https://www.paylocity.com/company/about-us/newsroom/in-the-news/ | status: bot_blocked | observed: 2026-06-04
-  Suggested replacement (if found): https://www.paylocity.com/company/about-us/newsroom/in-the-news/whats-new-<month>-<year>/  (dated monthly blog)
-- Cornerstone OnDemand | (no curated source in file) | status: replaced | observed: 2026-06-04
-  Suggested replacement (if found): https://www.cornerstoneondemand.com/company/news-room/press-releases/
-- Workday Peakon | (no curated source in file) | status: replaced | observed: 2026-06-04
-  Suggested replacement (if found): https://doc.workday.com/en-us/peakon.html  (release dates also well-surfaced by third-party 2026R1/R2 guides)
+- Paylocity: every paylocity.com path serves a Cloudflare JS interstitial to curl and renders empty to WebFetch; the September roundup (/resources/learn/blogs/whats-new-blog-september-2026/) was unpublished on 2026-10-13. Try first: the Releasebot aggregator, then the --news sweep. See the Retro proposal on a JS-rendering route.
+- UKG: www.ukg.com challenges curl and WebFetch (Cloudflare), but the newsroom reads through the tool. Full release text: FinancialContent syndication of Business Wire. In-product changes stay Unknown (login-only).
+- ADP: in-product release notes are login-only; only the MediaRoom press list is public. In-product changes stay Unknown.
+- Energage: no public product surface (help center in-app; Zendesk closed). Watch Engagedly's Beamer changelog for joint post-merger news.
+- Officevibe (Workleap): no release notes anywhere; items are dated from help-article timestamps (Likely at best). Re-check for a changelog launch.
+- Cornerstone OnDemand: the Workforce AI "What's New" keeps only the current month (prior months 404). Run every month or that month's notes are lost.
+- Leapsome: hub entries are batch-published with back-dated displayDates. Re-pull the hub at run time; a run in a month's first days misses late-month items.
+- Perceptyx: the blog RSS holds only 10 items. Page https://blog.perceptyx.com/page/2 for a full month.
+- Lattice: help center migrated off Zendesk (now https://help.lattice.com/en-us/), with no sitemap. Dated items come from the monthly roundup.
+- Calendar: Workday Rising (2026-10-12 to 10-15) and HR Tech (2026-10-20 to 10-22) both land in October. Run the October report after 2026-10-22 and expect high volume.
 ```
 
 ---
 
 ## Data (YAML)
 ```yaml
-version: "2.1"
+version: "3.0"
 
 competitors:
   - name: "15Five"
-    aliases: ["Kona", "Emplify (acquired)", "15Five Engage", "15Five Perform"]
+    aliases: ["Kona", "Emplify (acquired)", "15Five Engage", "15Five Perform", "Amaya"]
     website: "https://www.15five.com/"
+    news_query: "\"15Five\""
     sources:
-      # Live running list (verified rendering 2026-06-04, last updated 2026-05-28). This article
-      # ID superseded the older 36062624232219 page, which is what search still indexes.
+      # PRIMARY: live "What's new" running list, read through the public Zendesk Help Center API
+      # (one article; month headers "September 2026 Releases"; each item says "Released <Month> <day>").
       - kind: release_notes
         url: "https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases"
-        flags: ["running_list", "ui_dynamic"]
-      # Prior article ID — retained as a fallback / for search reconciliation (may redirect or be stale).
-      - kind: release_notes
-        url: "https://success.15five.com/hc/en-us/articles/36062624232219-What-s-New-in-15Five-Product-Releases"
-        flags: ["running_list", "ui_dynamic", "stale"]
+        route: zendesk_article
+        flags: ["running_list"]
+        verified: "2026-10-13"
+      # Newest-created help articles: new features get new "Feature Overview" articles.
       - kind: help_center
         url: "https://success.15five.com/hc/en-us"
-        flags: ["index", "ui_dynamic"]
-      # Discovery/lead only — never cite directly; use to surface feature names, then find the official doc.
+        route: zendesk_recent
+        flags: ["index"]
+        verified: "2026-10-13"
+      # Discovery/lead only — never fetched or cited.
       - kind: social
         url: "https://www.linkedin.com/products/15five/"
         flags: ["search_required"]
@@ -184,228 +97,465 @@ competitors:
   - name: "Culture Amp"
     aliases: []
     website: "https://www.cultureamp.com/"
+    news_query: "\"Culture Amp\""
     sources:
-      # PRIMARY: public product-updates newsfeed (no login). Verified 2026-06-04 — dated, chronological,
-      # category-labeled entries (e.g., "Introducing Self-Service SAML/SSO Configuration", 2026-05-14).
-      # This is Culture Amp's cleanest machine-readable surface; scan it first. Hosted on Intercom News,
-      # which exposes NO public RSS/Atom/JSON feed (verified 2026-06-04: /rss, /feed, /feed.rss all 404;
-      # Intercom News offers RSS only as an API *input*, not a syndication output). The newsfeed page
-      # itself is the feed — no sibling feed URL to promote. Do not re-chase one.
+      # PRIMARY: public product-updates newsfeed (Intercom News). Server-rendered; JSON-LD carries a
+      # per-post permalink for every card (https://updates.cultureamp.com/<id>-<slug>): cite those, not
+      # the feed root. No public RSS exists (verified 2026-06-04: /rss, /feed, /feed.rss all 404).
       - kind: product_updates
         url: "https://updates.cultureamp.com"
+        route: intercom_news
         flags: ["running_list"]
-      - kind: product_updates
-        url: "https://support.cultureamp.com/en/collections/3904790-product-updates"
-        flags: ["index"]
-
-      # 2026+ change: Culture Amp moved “new updates” to a public newsfeed starting 2026.
-      - kind: product_updates
-        url: "https://support.cultureamp.com/en/collections/17746165-2026-product-updates"
-        flags: ["index", "year_pinned"]
-      - kind: product_updates
-        url: "https://support.cultureamp.com/en/articles/13331721-accessing-culture-amp-product-updates-in-2026"
-        flags: ["year_pinned"]
-      - kind: product_updates
-        url: "https://intercom.news/culture-amp"
-        flags: ["running_list"]
-
-      # 2025 year-pinned module pages (retain for historical windows)
-      - kind: release_notes
-        url: "https://support.cultureamp.com/en/articles/10368642-employee-engagement-product-updates-2025"
-        flags: ["running_list", "year_pinned"]
-      - kind: release_notes
-        url: "https://support.cultureamp.com/en/articles/10368650-performance-management-product-updates-2025"
-        flags: ["running_list", "year_pinned"]
-      - kind: release_notes
-        url: "https://support.cultureamp.com/en/articles/10368593-goals-1-on-1s-skills-coach-anytime-feedback-product-updates-2025"
-        flags: ["running_list", "year_pinned"]
-      - kind: release_notes
-        url: "https://support.cultureamp.com/en/articles/10363297-employee-development-product-updates-2025"
-        flags: ["running_list", "year_pinned"]
-
+        verified: "2026-10-13"
+      # Help-center collection; feature docs linked from newsfeed posts.
       - kind: help_center
-        url: "https://support.cultureamp.com/"
-        flags: ["index"]
+        url: "https://support.cultureamp.com/en/collections/3904790-product-updates"
+        flags: ["index", "undated"]
+        verified: "2026-10-13"
+      # Corporate/product announcements live at https://www.cultureamp.com/company/announcements/<slug>
+      # (JSON-LD datePublished), e.g. the MCP launch (2026-08-24): .../culture-intelligence-in-daily-tools.
+      # Removed 2026-10-13: 2026-product-updates collection (404) and the five 2025/2026 year-pinned
+      # help articles (stale since 2026-07); intercom.news/culture-amp mirrors the primary.
 
   - name: "Gallup"
-    aliases: []
+    aliases: ["Gallup Access", "Q12", "CliftonStrengths"]
     website: "https://www.gallup.com/"
+    # Generic name: restrict the press sweep to the workplace product.
+    news_query: "\"Gallup Access\" OR (\"Gallup\" (Q12 OR \"employee engagement\" OR CliftonStrengths) (launch OR app OR platform OR feature))"
     sources:
+      # PRIMARY (found 2026-10-13): dated "Gallup Product Updates" section. HTML and Atom are
+      # Cloudflare-403'd; the public Help Center API reads it cleanly. Closes the long-standing
+      # "no dated public changelog" gap.
+      - kind: release_notes
+        url: "https://support.gallup.com/hc/en-us/sections/53122467937811-Gallup-Product-Updates"
+        route: zendesk_section
+        flags: ["bot_blocked"]
+        verified: "2026-10-13"
       - kind: help_center
         url: "https://support.gallup.com/hc/en-us"
-        flags: ["index", "ui_dynamic"]
+        route: zendesk_recent
+        flags: ["index", "bot_blocked"]
+        verified: "2026-10-13"
 
   - name: "Lattice"
     aliases: []
     website: "https://lattice.com/"
+    # Generic name: exclude Lattice Semiconductor and other "lattice" noise.
+    news_query: "\"Lattice\" (HR OR \"performance management\" OR employees OR \"Sarah Franklin\") -semiconductor -FPGA"
     sources:
-      # PRIMARY (verified clean-fetch 2026-06-04): dated monthly roundup, one post per month —
-      # pattern https://lattice.com/blog/<month>-<year>-product-updates (e.g. .../may-2026-product-updates).
+      # PRIMARY: dated monthly roundup, published on the month's last day (e.g. 2026-09-30).
       - kind: blog
-        url: "https://lattice.com/blog/may-2026-product-updates"
-        flags: ["running_list", "month_pinned"]
-      - kind: product_updates
-        url: "https://lattice.com/product-updates"
-        flags: ["index", "running_list", "ui_dynamic"]
+        url: "https://lattice.com/blog/{month}-{year}-product-updates"
+        route: monthly_url
+        flags: ["running_list"]
+        verified: "2026-10-13"
+      # Product Updates blog category: catches seasonal launch/roadmap posts
+      # (e.g. .../blog/fall-winter-2026-product-release, 2026-09-02) between roundups.
       - kind: blog
         url: "https://lattice.com/blog?category_equal=%5B%22Product+Updates%22%5D"
         flags: ["index"]
+        verified: "2026-10-13"
+      - kind: product_updates
+        url: "https://lattice.com/product-updates"
+        flags: ["index", "undated"]
+        verified: "2026-10-13"
+      # Help center migrated off Zendesk by 2026-10 (old /hc/en-us root 404s; old /hc/... article links
+      # redirect to /en-us/articles/<id>-<slug>). No sitemap; use for feature docs, not dates.
       - kind: help_center
-        url: "https://help.lattice.com/hc/en-us"
-        flags: ["index", "ui_dynamic"]
+        url: "https://help.lattice.com/en-us/"
+        flags: ["index", "undated"]
+        verified: "2026-10-13"
 
   - name: "Microsoft Viva / Glint"
     aliases: ["Viva Glint", "Glint"]
     website: "https://www.microsoft.com/"
+    news_query: "\"Viva Glint\""
     sources:
-      # Primary “release-notes-equivalent” surface
+      # PRIMARY: TechCommunity board RSS; carries full post bodies ("News to Know", monthly).
+      # pubDate is the LAST EDIT time: take publish dates from the post page (datePublished).
+      - kind: feed
+        url: "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/board?board.id=viva_glint_blog"
+        route: rss
+        verified: "2026-10-13"
+      # Blog index (curl reads it; the old "bot_blocked / title only" was a WebFetch artifact and a
+      # gzip-encoded body). Dated cross-check: M365 Roadmap API
+      # https://www.microsoft.com/releasecommunications/api/v1/m365 (filter titles on "Glint").
       - kind: blog
         url: "https://techcommunity.microsoft.com/category/viva-glint/blog/viva_glint_blog"
-        flags: ["index", "running_list"]
+        flags: ["index"]
+        verified: "2026-10-13"
+      # Some Glint launches post on the Microsoft 365 board, not the Glint board (e.g. the survey-data
+      # export APIs, 2026-09-02). Filter items on "Glint".
+      - kind: feed
+        url: "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/board?board.id=microsoft_365blog"
+        route: rss
+        verified: "2026-10-13"
 
   - name: "Peakon / Workday"
-    aliases: ["Workday Peakon Employee Voice", "Peakon Employee Voice"]
+    aliases: ["Workday Peakon Employee Voice", "Peakon Employee Voice", "Workday", "Sana"]
     website: "https://www.workday.com/"
+    news_query: "\"Peakon\" OR (\"Workday\" (Peakon OR \"employee voice\" OR talent OR Sana OR agents))"
+    sources:
+      # PRIMARY (Peakon): the 2026 year index renders JS-empty, but any release-note child page embeds
+      # a nav tree (JSON) linking every note with its date in the URL (89 links, 2025-2026, on 2026-10-13).
+      - kind: release_notes
+        url: "https://doc.workday.com/peakon/en-us/workday-peakon-employee-voice/product-updates/release-notes/2026/june/wednesday--10th-june.html"
+        route: dated_links
+        flags: ["index"]
+        verified: "2026-10-13"
+      # PRIMARY (Workday platform/talent): Cision MediaRoom list, dated in each link (?l=100 = full list;
+      # the ?pagetemplate=rss feed carries only the 5 newest).
+      - kind: newsroom
+        url: "https://newsroom.workday.com/press-releases?l=100"
+        route: dated_links
+        flags: ["index"]
+        verified: "2026-10-13"
+      # Feature lists per release (R1/R2) without login; production dates need a partner deck or
+      # customer IT notice (Release Center is login-only). Corporate/M&A: 8-K item codes at
+      # https://data.sec.gov/submissions/CIK0001327811.json (read filings via WebFetch; www.sec.gov
+      # blocks undeclared tools).
+      - kind: docs
+        url: "https://community-content.workday.com/en-us/public/feature-release/workday-success-plans--feature-release-reviews/2026r2-feature-release-review-webinars/2026r2-workday-peakon-employee-voice.html"
+        flags: ["year_pinned", "undated"]
+        verified: "2026-10-13"
 
   - name: "Qualtrics"
     aliases: ["Qualtrics XM", "Qualtrics EmployeeXM"]
     website: "https://www.qualtrics.com/"
+    news_query: "\"Qualtrics\" (EmployeeXM OR \"employee experience\" OR EX OR launch OR unveils)"
     sources:
-      - kind: community
+      # PRIMARY: weekly product release notes. Index and every weekly note were public on 2026-10-13
+      # (the old "login" label did not reproduce). Operative date = the note's "Features Released On
+      # Or Before <date>" section; "Starting On & After" is next week's preview. No RSS (all paths 404);
+      # the sitemap lists placeholder topic IDs that 404, so follow the index links, don't guess IDs.
+      - kind: release_notes
         url: "https://community.qualtrics.com/product-release-notes-96"
-        flags: ["index", "ui_dynamic", "search_required"]
-      - kind: help_center
-        url: "https://www.qualtrics.com/support/"
         flags: ["index"]
+        verified: "2026-10-13"
+      - kind: newsroom
+        url: "https://www.qualtrics.com/news/"
+        flags: ["index"]
+        verified: "2026-10-13"
 
   - name: "SurveyMonkey"
-    aliases: []
+    aliases: ["Momentive"]
     website: "https://www.surveymonkey.com/"
+    news_query: "\"SurveyMonkey\""
     sources:
-      - kind: release_notes
-        url: "https://help.surveymonkey.com/en/surveymonkey/new/"
-        flags: ["index", "ui_dynamic"]
-      - kind: release_notes
-        url: "https://help.surveymonkey.com/en/surveymonkey/new/release-notes-may-2025-dec-2025/"
-        flags: ["running_list", "year_pinned"]
-      - kind: help_center
-        url: "https://help.surveymonkey.com/en/"
+      # PRIMARY: What's New now carries per-item dates (it did not in 2026-07).
+      - kind: product_updates
+        url: "https://www.surveymonkey.com/product/features/whats-new/"
+        verified: "2026-10-13"
+      - kind: newsroom
+        url: "https://www.surveymonkey.com/newsroom/"
         flags: ["index"]
+        verified: "2026-10-13"
+      # Discovery: new feature docs (e.g. Workday/BambooHR HRIS integrations, first published
+      # 2026-09-28) never reached the release notes. lastmod is an edit date; read the page's embedded
+      # CMS "date" field for first publish.
+      - kind: docs
+        url: "https://help.surveymonkey.com/sitemap-en.xml"
+        route: sitemap
+        flags: ["index"]
+        verified: "2026-10-13"
+      - kind: release_notes
+        url: "https://help.surveymonkey.com/en/surveymonkey/new/release-notes/"
+        flags: ["stale"]
+        verified: "2026-10-13"
 
   - name: "ADP"
-    aliases: ["ADP Workforce Now", "ADP SmartCompliance"]
+    aliases: ["ADP Workforce Now", "ADP SmartCompliance", "ADP Assist", "ADP Lyric", "StandOut"]
     website: "https://www.adp.com/"
+    # Unqualified "ADP" returns fantasy-football ADP and the National Employment Report.
+    news_query: "\"ADP\" (\"ADP Assist\" OR \"Workforce Now\" OR Lyric OR StandOut OR \"human capital\") -fantasy -football"
+    sources:
+      # Cision MediaRoom: dated press list (www.adp.com newsroom returns 403). In-product release notes
+      # are login-only, so in-product changes stay Unknown.
+      - kind: newsroom
+        url: "https://mediacenter.adp.com/press-releases?l=100"
+        route: dated_links
+        flags: ["index"]
+        verified: "2026-10-13"
 
   - name: "BambooHR"
-    aliases: []
+    aliases: ["Bamboo AI"]
     website: "https://www.bamboohr.com/"
+    news_query: "\"BambooHR\""
     sources:
-      - kind: product_updates
-        url: "https://www.bamboohr.com/product-updates/"
-        flags: ["index", "ui_dynamic", "bot_blocked"]
-      - kind: help_center
-        url: "https://help.bamboohr.com/"
-        flags: ["index"]
+      # PRIMARY: product-updates RSS (578 dated items on 2026-10-13). The HTML hub is a JS shell.
+      # Full index with productArea (maps to QW packages) and planType:
+      # https://www.bamboohr.com/product-updates/query-index.json . Child pages carry a meta
+      # publication-date. Newsroom paths 404: find press via the --news sweep (GlobeNewswire).
+      - kind: feed
+        url: "https://www.bamboohr.com/product-updates/feed/"
+        route: rss
+        verified: "2026-10-13"
+      # AI connector / MCP status (beta vs GA).
+      - kind: docs
+        url: "https://documentation.bamboohr.com/docs/mcp-server"
+        flags: ["undated"]
+        verified: "2026-10-13"
 
   - name: "Betterworks"
-    aliases: []
+    aliases: ["Betterworks NextGen", "Betterworks Classic"]
     website: "https://www.betterworks.com/"
+    news_query: "\"Betterworks\""
     sources:
+      # PRIMARY: bi-weekly "Release: <date>" notes. /hc/ HTML and the section Atom feed 403 on curl and
+      # WebFetch (every run since 2026-05); the public Help Center API returns all of them, dated.
+      # Seasonal roll-ups ("Summer Release - September 2026") re-list earlier features: de-dup them
+      # against the bi-weekly notes, and watch those notes for pre-announced go-live dates.
       - kind: release_notes
         url: "https://support.betterworks.com/hc/en-us/sections/360012378232-Release-Notes"
-        flags: ["index", "ui_dynamic", "bot_blocked"]
-      - kind: help_center
-        url: "https://support.betterworks.com/hc/en-us"
-        flags: ["index", "ui_dynamic"]
+        route: zendesk_section
+        flags: ["index", "bot_blocked"]
+        verified: "2026-10-13"
+      # Discovery: real per-URL lastmods surface launch posts (/magazine/<season>-<year>-product-release)
+      # and root-level press releases. lastmod is an edit date.
+      - kind: docs
+        url: "https://www.betterworks.com/sitemap.xml"
+        route: sitemap
+        flags: ["index"]
+        verified: "2026-10-13"
+      # Dated press index. Business Wire is walled to curl and WebFetch; Betterworks hosts identical
+      # copies at https://www.betterworks.com/<release-slug> (text there, date from this index).
+      - kind: newsroom
+        url: "https://www.betterworks.com/press"
+        flags: ["index"]
+        verified: "2026-10-13"
+      # Mobile: Apple iTunes lookup API dates app launches that appear in no release note
+      # (new NextGen app 1.0 released 2026-09-08).
+      - kind: docs
+        url: "https://itunes.apple.com/lookup?id=6795434862&country=us"
+        route: json_api
+        cite: "https://apps.apple.com/us/app/betterworks/id6795434862"
+        verified: "2026-10-13"
 
   - name: "Cornerstone OnDemand"
-    aliases: ["CSOD", "Cornerstone"]
+    aliases: ["CSOD", "Cornerstone", "Cornerstone Workforce AI"]
     website: "https://www.cornerstoneondemand.com/"
+    news_query: "\"Cornerstone OnDemand\" OR \"Cornerstone Workforce AI\""
+    sources:
+      # PRIMARY (found 2026-10-13): Workforce AI monthly "What's New" on a MadCap Flare help site. The
+      # shell is JS-empty, but the TOC chunk lists every release topic (/Content/Release/<MonYYYY>/<Topic>.htm,
+      # server-rendered; "Last Published" footer gives the day). ONLY THE CURRENT MONTH IS RETAINED: prior
+      # months 404, so a skipped month is lost. Freshness: https://help.csod.com/cwfai/Data/HelpSystem.xml (BuildTime).
+      - kind: release_notes
+        url: "https://help.csod.com/cwfai/Data/Tocs/PrimaryTOC_Chunk0.js"
+        route: dated_links
+        base: "https://help.csod.com/cwfai/"
+        cite: "https://help.csod.com/cwfai/Content/WhatsNew.htm"
+        flags: ["running_list"]
+        verified: "2026-10-13"
+      # Classic platform (Galaxy / Single Architecture): dated change log incl. bi-weekly patches.
+      - kind: release_notes
+        url: "https://help.csod.com/sa/Content/SingleArchitecture/Whats_New/ChangeLog_for_SA.htm"
+        flags: ["running_list"]
+        verified: "2026-10-13"
+      # Press: per-URL lastmod (watch for bulk edits of old pages; read the on-page date).
+      - kind: newsroom
+        url: "https://www.cornerstoneondemand.com/sitemaps/press/sitemap.xml"
+        route: sitemap
+        verified: "2026-10-13"
+      # Release articles land in resources; the news listing is client-rendered (Algolia).
+      - kind: blog
+        url: "https://www.cornerstoneondemand.com/resources/topics/cornerstone-news/"
+        flags: ["index", "ui_dynamic"]
 
   - name: "Energage"
-    aliases: ["Top Workplaces platform"]
+    aliases: ["Top Workplaces platform", "Energage + Engagedly"]
     website: "https://www.energage.com/"
+    # Unqualified "Energage" returns Top Workplaces award coverage.
+    news_query: "\"Energage\" (launch OR platform OR product OR Engagedly OR integration)"
+    sources:
+      # No public product changelog: the help center is in-app (login) and energage.zendesk.com is closed.
+      # Post-merger joint product news is most likely to appear on Engagedly's changelog (see Engagedly).
+      - kind: blog
+        url: "https://www.energage.com/feed/"
+        route: rss
+        flags: ["search_required"]
+        verified: "2026-10-13"
 
   - name: "Engagedly"
-    aliases: []
+    aliases: ["Marissa AI"]
     website: "https://engagedly.com/"
+    news_query: "\"Engagedly\""
     sources:
-      - kind: blog
-        url: "https://engagedly.com/blog/?integration=Product+Updates"
-        flags: ["index"]
+      # PRIMARY: Beamer changelog backend (the changelog.engagedly.com page is JS-only; no RSS exists).
+      # Dated entries with permalinks; page=N for more. Product id is in the page's inline script.
+      - kind: release_notes
+        url: "https://changelog.engagedly.com/loadMoreNews?app_id=mZiIYhKZ41992&language=EN&publicPage=true&page=0"
+        cite: "https://changelog.engagedly.com"
+        verified: "2026-10-13"
+      # Press-releases category (WordPress REST; category 472). The "Product Updates" category (460)
+      # is stale since 2024-05-31.
+      - kind: newsroom
+        url: "https://engagedly.com/wp-json/wp/v2/posts?categories=472"
+        route: wp_json
+        verified: "2026-10-13"
       - kind: help_center
         url: "https://help.engagedly.com/"
-        flags: ["index"]
+        flags: ["index", "undated"]
+        verified: "2026-10-13"
 
   - name: "Leapsome"
-    aliases: []
+    aliases: ["Leapy"]
     website: "https://www.leapsome.com/"
+    news_query: "\"Leapsome\""
     sources:
-      - kind: product_updates
-        url: "https://help.leapsome.com/hc/en-us/articles/360004361834-Platform-improvements"
-        flags: ["running_list", "ui_dynamic", "bot_blocked"]
-      # Dated monthly roundup (fetchable surface) — pattern site.leapsome.com/blog/product-updates-<mon>-<year>.
-      - kind: blog
-        url: "https://site.leapsome.com/blog/product-updates-mar-2026"
-        flags: ["running_list", "month_pinned"]
+      # PRIMARY (found 2026-10-13): the public Product Updates Hub at
+      # https://www.leapsome.com/app/#/product-updates (the app marks the route public: no login) reads
+      # this public JSON endpoint: 264 dated entries, displayDate = operative date (UTC; the tool converts
+      # to CT). Entries are batch-published with back-dated displayDates, so re-pull at run time; a run in
+      # the first days of a month can miss late-month items. Also accepts module=, featured=true, aiFeature=true.
+      - kind: feed
+        url: "https://www.leapsome.com/api/release-notes?page=1&limit=100"
+        route: json_api
+        cite: "https://www.leapsome.com/app/#/product-updates"
+        verified: "2026-10-13"
+      # Help center: corroboration via the public Zendesk search API (HTML 403s).
       - kind: help_center
-        url: "https://help.leapsome.com/"
-        flags: ["index", "ui_dynamic"]
+        url: "https://help.leapsome.com/hc/en-us"
+        route: zendesk_recent
+        flags: ["index", "bot_blocked"]
+        verified: "2026-10-13"
       - kind: roadmap
         url: "https://leapsome.notion.site/leapsome/Leapsome-s-Product-Roadmap-c914ffc89c824e7db33130f3cc5bfb1f"
         flags: ["ui_dynamic"]
+      # Removed 2026-10-13: "Platform improvements" running list (help.leapsome.com article 360004361834;
+      # frozen at 2026-02-16, now points to the hub) and the monthly blog roundup pattern
+      # site.leapsome.com/blog/product-updates-<mon>-<year> (discontinued after April 2026).
+      # Blog JSON-LD dates and www.leapsome.com sitemap lastmods are republish/bulk stamps: never operative dates.
 
   - name: "Officevibe (Workleap)"
-    aliases: ["Workleap Officevibe"]
+    aliases: ["Workleap Officevibe", "Workleap", "Workleap Agent", "Pingboard", "Team Health & Feedback"]
     website: "https://workleap.com/officevibe"
+    news_query: "\"Workleap\" OR \"Officevibe\""
     sources:
+      # No release notes, changelog, RSS, or what's-new page anywhere (changelog.workleap.com does not
+      # resolve; /whats-new etc. 404). Product changes surface only as new Intercom help articles: filter
+      # by lastmod, read lastUpdatedDate from each article's embedded JSON. Undated releases: date them by
+      # doc timestamps (Confidence: Likely at best).
       - kind: help_center
-        url: "https://help.workleap.com/en/"
+        url: "https://help.workleap.com/sitemap.xml"
+        route: sitemap
+        flags: ["index", "search_required"]
+        verified: "2026-10-13"
+      # De facto AI changelog: https://help.workleap.com/en/collections/13569920-workleap-ai
+      # (Workleap Agent / MCP articles with lastUpdated stamps).
+      - kind: newsroom
+        url: "https://www.prnewswire.com/news/workleap/"
+        flags: ["index", "press"]
+        verified: "2026-10-13"
+      # On-page "Published on" dates; ignore Webflow JSON-LD dates (site-rebuild stamps).
+      - kind: blog
+        url: "https://workleap.com/category/news"
         flags: ["index"]
+        verified: "2026-10-13"
 
   - name: "Paylocity"
-    aliases: []
+    aliases: ["Ignite AI"]
     website: "https://www.paylocity.com/"
+    news_query: "\"Paylocity\""
     sources:
+      # Monthly roundup moved to /resources/learn/blogs/whats-new-blog-<month>-<year>/ (August 2026
+      # edition published 2026-09-16). Every paylocity.com path serves a Cloudflare JS interstitial to
+      # curl and renders empty to WebFetch; investors.paylocity.com and GlobeNewswire return Akamai 403.
       - kind: blog
-        url: "https://www.paylocity.com/company/about-us/newsroom/in-the-news/"
-        flags: ["search_required", "ui_dynamic"]
+        url: "https://www.paylocity.com/resources/learn/blogs/whats-new-blog-{month}-{year}/"
+        route: monthly_url
+        flags: ["bot_blocked", "ui_dynamic"]
+      # Third-party aggregator with dated full text and official links: discovery only, cite the official URL.
+      - kind: aggregator
+        url: "https://releasebot.io/updates/paylocity/paylocity"
+        verified: "2026-10-13"
 
   - name: "Perceptyx"
-    aliases: []
+    aliases: ["Cultivate", "Humu"]
     website: "https://www.perceptyx.com/"
+    news_query: "\"Perceptyx\""
     sources:
+      # PRIMARY: one dated "Release Notes | <Month YYYY>" article per month (LISTEN / ANALYZE / ACT /
+      # PLATFORM), published early the following month. Read fine on 2026-10-13; the old "bot_blocked"
+      # label did not reproduce.
       - kind: release_notes
         url: "https://perceptyxhelp.freshdesk.com/support/solutions/folders/63000237891"
-        flags: ["index", "ui_dynamic"]
-      - kind: help_center
-        url: "https://perceptyxhelp.freshdesk.com/support/solutions"
-        flags: ["index", "ui_dynamic"]
+        flags: ["index"]
+        verified: "2026-10-13"
+      # Launch announcements (e.g. Perceptyx Anywhere, 2026-09-29). RSS holds only the 10 newest
+      # posts: page https://blog.perceptyx.com/page/2 to cover a whole month.
+      - kind: feed
+        url: "https://blog.perceptyx.com/rss.xml"
+        route: rss
+        verified: "2026-10-13"
+      # MCP / Perceptyx Anywhere state (undated product page: which parts are GA vs design-partner).
+      - kind: docs
+        url: "https://go.perceptyx.com/platform/mcp"
+        flags: ["undated"]
+        verified: "2026-10-13"
 
   - name: "PerformYard"
-    aliases: []
+    aliases: ["PerformYard Talent Development", "Ask PerformYard"]
     website: "https://www.performyard.com/"
+    news_query: "\"PerformYard\""
     sources:
-      - kind: help_center
-        url: "https://support.performyard.com/"
+      # No changelog, RSS, newsroom, or what's-new page (all 404). Launches land as dated articles
+      # (e.g. /articles/introducing-performyard-talent-development, 2026-09-01); the site sitemap has real
+      # per-URL lastmods and surfaces them.
+      - kind: docs
+        url: "https://www.performyard.com/sitemap.xml"
+        route: sitemap
         flags: ["index"]
-      - kind: press
-        url: "https://www.prweb.com/"
-        flags: ["press", "search_required"]
+        verified: "2026-10-13"
+      # Help Scout Docs (not Zendesk: the Zendesk API routes do not apply). New article IDs + lastmod
+      # reveal new features; articles show "Last updated on <date>" only.
+      - kind: help_center
+        url: "https://support.performyard.com/sitemap.xml"
+        route: sitemap
+        flags: ["index"]
+        verified: "2026-10-13"
+      # Removed 2026-10-13: https://www.prweb.com/ (a press-wire homepage, not a PerformYard source;
+      # the --news sweep covers press).
 
   - name: "Predictive Index"
-    aliases: ["The Predictive Index", "PI", "PI Perform"]
+    aliases: ["The Predictive Index", "PI", "PI Perform", "Obi"]
     website: "https://www.predictiveindex.com/"
+    news_query: "\"Predictive Index\" OR \"PI Perform\""
     sources:
+      # PRIMARY: release notes; each entry has an explicit "Date released" and an M/D/YYYY title.
+      # Entries labelled "Tentative release window" are roadmap, not shipped.
       - kind: release_notes
         url: "https://docs.predictiveindex.com/en/collections/12282995-release-notes"
         flags: ["index"]
-      - kind: help_center
-        url: "https://docs.predictiveindex.com/en/"
-        flags: ["index"]
+        verified: "2026-10-13"
+      # Watch: MCP connector docs (pre-beta as of 2026-10; not in the release notes).
+      - kind: docs
+        url: "https://docs.predictiveindex.com/en/collections/19719980-the-predictive-index-mcp"
+        flags: ["index", "undated"]
+        verified: "2026-10-13"
+      # Press: the newsroom path is /news-press/news/ (/newsroom/ and /press/ 404); its news sitemap is dated.
+      - kind: newsroom
+        url: "https://www.predictiveindex.com/news-sitemap.xml"
+        route: sitemap
+        verified: "2026-10-13"
+      - kind: feed
+        url: "https://www.predictiveindex.com/feed/"
+        route: rss
+        verified: "2026-10-13"
 
   - name: "UKG"
-    aliases: ["UKG Ready", "UKG Pro", "UKG Pro WFM", "Kronos"]
+    aliases: ["UKG Ready", "UKG Pro", "UKG Pro WFM", "Kronos", "UKG Bryte", "People Assist"]
     website: "https://www.ukg.com/"
-    # No curated sources yet — relies on runtime discovery (see Prompt File).
+    # Unqualified "UKG" returns UK garage music and kindergarten ("UKG") noise.
+    news_query: "\"UKG\" (site:businesswire.com OR \"UKG Pro\" OR \"UKG Ready\" OR Bryte OR \"People Assist\")"
+    sources:
+      # Newsroom (dated cards). Readable through tools/ci_sources.py's plain urllib client on 2026-10-13,
+      # while curl and WebFetch get a Cloudflare managed challenge on all of www.ukg.com: different clients
+      # get different answers. Never try to solve the challenge. Business Wire blocks curl and WebFetch;
+      # read full release text via FinancialContent syndication:
+      # https://investor.wedbush.com/wedbush/article/bizwire-<YYYY>-<M>-<D>-<title-slug>
+      - kind: newsroom
+        url: "https://www.ukg.com/company/newsroom"
+        flags: ["index"]
+        verified: "2026-10-13"
 ```

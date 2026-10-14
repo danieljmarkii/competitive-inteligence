@@ -1,0 +1,43 @@
+{
+  "kicker": "Competitive landscape & updates · September 2026",
+  "headline": "AI moved into the manager's loop: the review, the 1:1, and the action plan",
+  "stats": [
+    {
+      "value": "74",
+      "label": "verified updates"
+    },
+    {
+      "value": "16",
+      "label": "of 21 competitors shipped"
+    },
+    {
+      "value": "6",
+      "label": "MCP launches and upgrades"
+    }
+  ],
+  "themes": [
+    {
+      "title": "The 1:1 becomes review evidence",
+      "evidence": "Betterworks turns Zoom 1:1 transcripts into recaps and goal updates (Sep 15); Leapsome turns them into goals and praise (Sep 16); 15Five's AI-drafted reviews went GA (Sep 17).",
+      "so_what": "meeting capture now feeds review AI. What feeds Ask AI from our 1-on-1s?"
+    },
+    {
+      "title": "Review scoring gets weighted",
+      "evidence": "Lattice blends ratings, goals, and competencies into one normalized score with half-point scales (Sep 30); Culture Amp pulls goals and custom demographics into reviews (Sep 29).",
+      "so_what": "weighting and competencies in reviews are table stakes; check decimal-scale parity."
+    },
+    {
+      "title": "AI closes the survey-to-action loop",
+      "evidence": "Leapsome auto-drafts survey action plans (Sep 10); Culture Amp's AI probes answers mid-survey (Sep 8) and flags sensitive comments (Sep 23).",
+      "so_what": "our AI action planning has a direct match; win on anonymity and follow-through."
+    },
+    {
+      "title": "People data opens to outside AI",
+      "evidence": "Perceptyx put survey data and action plans into Copilot, Claude, and ChatGPT via MCP, with attrition models in pilot (Sep 29); BambooHR and Lattice widened MCP access.",
+      "so_what": "expect an MCP question in evaluations, and a Retention Radar comparison."
+    }
+  ],
+  "watch_next": "15Five's MCP and 1:1 Meeting Assistant (Oct 8), Workday Rising agents (Oct 13), Lattice Meetings and AI calibration (fall roadmap).",
+  "source": "Source: QW CI report for 2026-09-01 to 2026-09-30 (reports/2026-09-CI-Report.md). Vendor release notes, help centers, and press; every item dated and linked there.",
+  "notes": "Talk track (about 90 seconds)\n\n1) The 1:1 becomes review evidence.\n- Betterworks Conversational Intelligence (GA 2026-09-15): Zoom or uploaded 1:1 transcripts become a shared recap, a private prep brief, and suggested action items and goal updates. https://support.betterworks.com/hc/en-us/articles/48817244144781-Conversational-Intelligence-NextGen\n- Leapsome Smart Follow-Ups (2026-09-16): one-tap goals, praise, and requests from meeting transcripts. https://www.leapsome.com/app/#/product-updates\n- 15Five AI-Assisted Reviews GA (2026-09-17): drafts grounded in evidence from 15Five and connected tools, including 1-on-1 notes; Amaya now analyzes review open text (2026-09-25). https://success.15five.com/hc/en-us/articles/50989471559067-What-s-new-in-15Five-Product-releases\n\n2) Review scoring gets weighted.\n- Lattice (2026-09-30): goals and competencies in weighted overall scores, auto-normalized across scales and fed to calibration; opt-in 0.1 rating increments. https://lattice.com/blog/september-2026-product-updates\n- Culture Amp (2026-09-29): Goals in Reviews (AI Coach uses goal context) and custom demographics in review cycles. https://updates.cultureamp.com/158621-goals-in-reviews-now-available\n\n3) AI closes the survey-to-action loop.\n- Leapsome AI-generated survey action plans (2026-09-10), with suggested owners and timelines. https://www.leapsome.com/app/#/product-updates\n- Culture Amp AI Follow-Ups (2026-09-08) and Sensitive Comment Management (2026-09-23). https://updates.cultureamp.com/156617-uncover-the-why-behind-your-data-with-ai-follow-ups\n- Also: Qualtrics action-plan reminders via email and Teams (2026-09-02); Viva Glint Copilot comment rewrite (end of September; off by default; rewritten comments are not flagged in reports).\n\n4) People data opens to outside AI.\n- Perceptyx Anywhere (2026-09-29): GA MCP server and APIs bring survey results, nudges, and action plans into Copilot, Claude, ChatGPT, or custom agents under existing confidentiality thresholds; attrition-predicting models are in pilot with design partners. https://blog.perceptyx.com/perceptyx-launches-perceptyx-anywhere\n- BambooHR MCP server and Claude connector, including goal tools (beta, 2026-09-14); Lattice MCP in Glean (2026-09-30). Culture Amp launched MCP on 2026-08-24, so Lattice, Culture Amp, and Leapsome all have one now.\n\nAlso notable (not on the slide)\n- Development: Betterworks AI development plans with LMS course recommendations and role matching (2026-09-15); PerformYard's new Talent Development suite with AI coaching, competencies, and comp (2026-09-01).\n- Recognition & Rewards: BambooHR added AI-suggested, points-based recognition in Slack (beta, 2026-09-14). An HRIS our customers may already own now does recognition plus rewards.\n\nMethod: all 21 tracked competitors scanned; 74 verified in-window items (8 High, 21 Medium, 45 Low). Full report with every source: reports/2026-09-CI-Report.md."
+}
