@@ -27,6 +27,8 @@ Routes (set per source with `route:` in the YAML; default is `html`)
   intercom_news    Intercom-hosted product-updates feed (paged, dated cards).
   rss              RSS or Atom feed.
   wp_json          WordPress REST API (`url` = site root or .../wp-json/wp/v2/posts).
+  sitemap          sitemap.xml; pages whose <lastmod> falls in the window (edit dates:
+                   confirm each page's publish date before citing it).
 
 Registry fields read here: per source `kind`, `url`, `flags`, `route`; per
 competitor `news_query` (Google News query for the --news sweep; disambiguate
@@ -41,6 +43,7 @@ import argparse
 import calendar
 import datetime as dt
 import email.utils
+import gzip
 import html
 import json
 import re
@@ -50,6 +53,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
+import zlib
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -87,18 +91,32 @@ def local_today():
     return dt.datetime.now(TZ).date()
 
 
+def decompress(raw, encoding):
+    """Some hosts (e.g. TechCommunity) gzip the body even when not asked; a
+    compressed body read as text looks like a bot-wall, so always decode it."""
+    enc = encoding.lower()
+    if enc == "gzip" or raw[:2] == b"\x1f\x8b":
+        return gzip.decompress(raw)
+    if enc == "deflate":
+        try:
+            return zlib.decompress(raw)
+        except zlib.error:
+            return zlib.decompress(raw, -zlib.MAX_WBITS)  # raw deflate stream
+    return raw
+
+
 def http_get(url, accept=None, retries=1):
     """GET a URL. Returns dict(status, ctype, text, url, error).
 
     Retries once, politely, on rate limits (429/503) and transient network errors.
     """
-    headers = {"User-Agent": UA}
+    headers = {"User-Agent": UA, "Accept-Encoding": "gzip, deflate"}
     if accept:
         headers["Accept"] = accept
     req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            raw = r.read(MAX_BYTES)
+            raw = decompress(r.read(MAX_BYTES), r.headers.get("Content-Encoding", ""))
             return {"status": r.status, "ctype": r.headers.get("Content-Type", ""),
                     "text": raw.decode("utf-8", "replace"), "url": r.geturl(), "error": ""}
     except urllib.error.HTTPError as e:
@@ -150,6 +168,13 @@ def find_dates(text):
 def newest(dates, today):
     past = [d for d in dates if d <= today]
     return max(past) if past else None
+
+
+def newest_month(text, today):
+    """Fallback for month-only dating ("Release Notes | September 2026"): first of that month."""
+    found = [dt.date(int(y), MONTHS.index(m) + 1, 1)
+             for m, y in re.findall(r"\b(%s)\s+(20\d\d)\b" % "|".join(MONTHS), text)]
+    return newest(found, today)
 
 
 def parse_any_date(value):
@@ -225,7 +250,26 @@ def route_html(src, start, end, today):
     ex = excerpt_for_window(text, start, end) if start else ""
     entries = [entry("In-window excerpt", None, url, ex)] if ex else []
     return {"ok": True, "status": f"HTTP {r['status']}", "note": note, "entries": entries,
-            "newest": newest(dates, today)}
+            "newest": newest(dates, today) or newest_month(text, today)}
+
+
+def route_sitemap(src, start, end, today):
+    """sitemap.xml: pages whose <lastmod> falls in the window. Finds new feature docs that
+    never reach a release note; lastmod is an edit date, so confirm the publish date on the page."""
+    r = http_get(src["url"], accept="application/xml, text/xml")
+    if r["status"] != 200:
+        return {"ok": False, "status": r["error"] or f"HTTP {r['status']}", "note": "", "entries": [], "newest": None}
+    pairs = re.findall(r"<loc>\s*(.*?)\s*</loc>\s*<lastmod>\s*(.*?)\s*</lastmod>", r["text"], re.S)
+    entries, dates = [], []
+    for loc, lastmod in pairs:
+        d = parse_any_date(lastmod)
+        dates.append(d)
+        if start is not None and in_window(d, start, end):
+            entries.append(entry(loc.rstrip("/").rsplit("/", 1)[-1].replace("-", " "), d, html.unescape(loc), "",
+                                 precision="day (lastmod)"))
+    entries.sort(key=lambda e: e["date"], reverse=True)
+    return {"ok": True, "status": f"HTTP 200, {len(pairs)} URLs", "note": "lastmod = last edit, not publish date",
+            "entries": entries[:60], "newest": newest([d for d in dates if d], today)}
 
 
 def expand_template(url, y, m):
@@ -406,6 +450,7 @@ ROUTES = {
     "html": route_html, "monthly_url": route_monthly_url, "zendesk_section": route_zendesk_section,
     "zendesk_recent": route_zendesk_recent, "zendesk_article": route_zendesk_article,
     "intercom_news": route_intercom_news, "rss": route_rss, "wp_json": route_wp_json,
+    "sitemap": route_sitemap,
 }
 
 
