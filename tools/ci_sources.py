@@ -31,6 +31,8 @@ Routes (set per source with `route:` in the YAML; default is `html`)
                    confirm each page's publish date before citing it).
   dated_links      A listing page whose links carry dates in the URL (Cision MediaRoom
                    newsrooms, AEM doc nav trees, /YYYY/MM/DD/ blogs).
+  json_api         A public JSON endpoint behind a public page (Leapsome's Product Updates
+                   Hub, Apple's iTunes lookup for mobile-app launches); dated records only.
 
 Registry fields read here: per source `kind`, `url`, `flags`, `route`; per
 competitor `news_query` (Google News query for the --news sweep; disambiguate
@@ -180,16 +182,25 @@ def newest_month(text, today):
     return newest(found, today)
 
 
+def to_local_date(moment):
+    """Timestamps with a zone are converted to America/Chicago before taking the date
+    (2026-09-10T03:04Z is still 09-09 in Chicago). Exactly midnight UTC is a date-only value
+    serialized as a timestamp (BambooHR's feed), so it keeps its calendar date."""
+    if not moment.tzinfo or (moment.utcoffset() == dt.timedelta(0) and moment.time() == dt.time(0)):
+        return moment.date()
+    return moment.astimezone(TZ).date()
+
+
 def parse_any_date(value):
     if not value:
         return None
     value = value.strip()
     try:
-        return email.utils.parsedate_to_datetime(value).date()
+        return to_local_date(email.utils.parsedate_to_datetime(value))
     except (TypeError, ValueError, IndexError):
         pass
     try:
-        return dt.datetime.fromisoformat(value.replace("Z", "+00:00")).date()
+        return to_local_date(dt.datetime.fromisoformat(value.replace("Z", "+00:00")))
     except ValueError:
         ds = find_dates(value)
         return ds[0] if ds else None
@@ -254,6 +265,52 @@ def route_html(src, start, end, today):
     entries = [entry("In-window excerpt", None, url, ex)] if ex else []
     return {"ok": True, "status": f"HTTP {r['status']}", "note": note, "entries": entries,
             "newest": newest(dates, today) or newest_month(text, today)}
+
+
+DATE_KEYS = ("displayDate", "publishedAt", "published_at", "datePublished", "releaseDate", "release_date",
+             "currentVersionReleaseDate", "date", "createdAt", "created_at", "pubDate")
+TITLE_KEYS = ("title", "headline", "name", "trackName", "version")
+URL_KEYS = ("url", "link", "permalink", "html_url", "trackViewUrl")
+
+
+def json_records(node):
+    """Every dict in a JSON document that has a recognizable date field."""
+    if isinstance(node, dict):
+        if any(k in node for k in DATE_KEYS):
+            yield node
+        for v in node.values():
+            yield from json_records(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from json_records(v)
+
+
+def route_json_api(src, start, end, today):
+    """A public JSON endpoint behind a public page (e.g. Leapsome's Product Updates Hub reads
+    /api/release-notes; Apple's iTunes lookup API dates mobile-app launches). Public, no auth:
+    never call an endpoint a login-gated page uses."""
+    r = http_get(src["url"], accept="application/json")
+    if r["status"] != 200:
+        return {"ok": False, "status": r["error"] or f"HTTP {r['status']}", "note": "", "entries": [], "newest": None}
+    try:
+        records = list(json_records(json.loads(r["text"])))
+    except ValueError:
+        return {"ok": False, "status": "HTTP 200 but not JSON", "note": "", "entries": [], "newest": None}
+    entries, dates = [], []
+    for rec in records:
+        # First key in priority order, never the max: hubs batch-create records with back-dated
+        # display dates (Leapsome), and the display date is the operative one.
+        d = next((parse_any_date(str(rec[k])) for k in DATE_KEYS if rec.get(k)), None)
+        dates.append(d)
+        if start is not None and in_window(d, start, end):
+            title = next((str(rec[k]) for k in TITLE_KEYS if rec.get(k)), "")
+            url = next((str(rec[k]) for k in URL_KEYS if rec.get(k)), src.get("cite", src["url"]))
+            body = " ".join(str(rec[k]) for k in ("description", "body", "summary", "content", "releaseNotes")
+                            if isinstance(rec.get(k), str))
+            entries.append(entry(title, d, url, html_to_text(body)))
+    entries.sort(key=lambda e: e["date"], reverse=True)
+    return {"ok": bool(records), "status": f"HTTP 200, {len(records)} dated records", "note": "",
+            "entries": entries, "newest": newest([d for d in dates if d], today)}
 
 
 def date_from_url(url):
@@ -501,7 +558,7 @@ ROUTES = {
     "html": route_html, "monthly_url": route_monthly_url, "zendesk_section": route_zendesk_section,
     "zendesk_recent": route_zendesk_recent, "zendesk_article": route_zendesk_article,
     "intercom_news": route_intercom_news, "rss": route_rss, "wp_json": route_wp_json,
-    "sitemap": route_sitemap, "dated_links": route_dated_links,
+    "sitemap": route_sitemap, "dated_links": route_dated_links, "json_api": route_json_api,
 }
 
 
