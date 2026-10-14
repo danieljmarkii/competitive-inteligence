@@ -29,6 +29,8 @@ Routes (set per source with `route:` in the YAML; default is `html`)
   wp_json          WordPress REST API (`url` = site root or .../wp-json/wp/v2/posts).
   sitemap          sitemap.xml; pages whose <lastmod> falls in the window (edit dates:
                    confirm each page's publish date before citing it).
+  dated_links      A listing page whose links carry dates in the URL (Cision MediaRoom
+                   newsrooms, AEM doc nav trees, /YYYY/MM/DD/ blogs).
 
 Registry fields read here: per source `kind`, `url`, `flags`, `route`; per
 competitor `news_query` (Google News query for the --news sweep; disambiguate
@@ -70,6 +72,7 @@ TIMEOUT = 25
 MAX_BYTES = 6_000_000
 SKIP_KINDS = {"social"}  # discovery-only channels; never fetched as sources
 TZ = ZoneInfo("America/Chicago")  # repo convention: dates are America/Chicago
+NEWS_PAUSE = 6  # seconds between Google News queries
 
 MONTHS = list(calendar.month_name)[1:]
 MONTH_RE = "|".join(m[:3] for m in MONTHS)
@@ -121,7 +124,7 @@ def http_get(url, accept=None, retries=1):
                     "text": raw.decode("utf-8", "replace"), "url": r.geturl(), "error": ""}
     except urllib.error.HTTPError as e:
         if e.code in (429, 503) and retries:
-            time.sleep(3)
+            time.sleep(8)
             return http_get(url, accept, retries - 1)
         return {"status": e.code, "ctype": e.headers.get("Content-Type", "") if e.headers else "",
                 "text": "", "url": url, "error": f"HTTP {e.code}"}
@@ -251,6 +254,54 @@ def route_html(src, start, end, today):
     entries = [entry("In-window excerpt", None, url, ex)] if ex else []
     return {"ok": True, "status": f"HTTP {r['status']}", "note": note, "entries": entries,
             "newest": newest(dates, today) or newest_month(text, today)}
+
+
+def date_from_url(url):
+    """A date carried in a URL path: /2026-09-24-Title (Cision MediaRoom newsrooms),
+    /2026/september/wednesday--16th-september.html (AEM doc nav trees), /2026/09/16/slug."""
+    path = urllib.parse.unquote(urllib.parse.urlparse(url).path)
+    m = re.search(r"/(20\d\d)/(%s)[a-z]*/[^/]*?(\d{1,2})(?:st|nd|rd|th)\b" % MONTH_RE, path, re.I)
+    try:
+        if m:
+            return dt.date(int(m.group(1)), month_num(m.group(2)), int(m.group(3)))
+        m = re.search(r"/(20\d\d)/(\d\d)/(\d\d)(?:/|$)", path)
+        if m:
+            return dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    except ValueError:
+        return None
+    m = re.search(r"/(20\d\d)-(\d\d)-(\d\d)(?:\b|-)", path)
+    if m:
+        try:
+            return dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError:
+            return None
+    return None
+
+
+def route_dated_links(src, start, end, today):
+    """A listing page whose links carry dates in their URLs: newsroom lists
+    (newsroom.workday.com/press-releases?l=100) or a doc page whose server-rendered nav
+    tree lists every sibling note even when the year index is JS-empty (doc.workday.com)."""
+    r = http_get(src["url"])
+    if r["status"] != 200:
+        return {"ok": False, "status": r["error"] or f"HTTP {r['status']}", "note": "", "entries": [], "newest": None}
+    # Anchors carry titles; quoted path strings catch links embedded in JSON (AEM nav trees).
+    candidates = re.findall(r'<a\b[^>]*?href="([^"#]+)"[^>]*>(.*?)</a>', r["text"], re.S | re.I)
+    candidates += [(p, "") for p in re.findall(r'"((?:https?://|/)[^"\s<>]+)"', r["text"])]
+    seen, entries, dates = set(), [], []
+    for href, label in candidates:
+        url = urllib.parse.urljoin(r["url"], html.unescape(href)).split("?")[0]
+        d = date_from_url(url)
+        if d is None or url in seen:
+            continue
+        seen.add(url)
+        dates.append(d)
+        if start is not None and in_window(d, start, end):
+            title = html_to_text(label) or url.rstrip("/").rsplit("/", 1)[-1].replace("-", " ")
+            entries.append(entry(title, d, url, ""))
+    entries.sort(key=lambda e: e["date"], reverse=True)
+    return {"ok": bool(seen), "status": f"HTTP 200, {len(seen)} dated links",
+            "note": "" if seen else "no dated links found", "entries": entries, "newest": newest(dates, today)}
 
 
 def route_sitemap(src, start, end, today):
@@ -450,7 +501,7 @@ ROUTES = {
     "html": route_html, "monthly_url": route_monthly_url, "zendesk_section": route_zendesk_section,
     "zendesk_recent": route_zendesk_recent, "zendesk_article": route_zendesk_article,
     "intercom_news": route_intercom_news, "rss": route_rss, "wp_json": route_wp_json,
-    "sitemap": route_sitemap,
+    "sitemap": route_sitemap, "dated_links": route_dated_links,
 }
 
 
@@ -589,6 +640,7 @@ def cmd_collect(args):
             if res["ok"] and not res["entries"]:
                 md.append("  - (no in-window entries found on this source)")
         if args.news:
+            time.sleep(NEWS_PAUSE)  # Google News rate-limits (503) after ~15 rapid queries
             url, res = google_news(comp.get("news_query") or f'"{comp["name"]}"', start, end)
             md.append(f"- Press sweep (google_news, {res['status']}): {url}")
             for e in res["entries"][:15]:
