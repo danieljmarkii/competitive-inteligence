@@ -406,10 +406,11 @@ def route_monthly_url(src, start, end, today):
     for y, m in targets:
         url = expand_template(src["url"], y, m)
         r = http_get(url)
-        statuses.append(f"{calendar.month_abbr[m]} {y}: HTTP {r['status'] or r['error']}")
-        if r["status"] != 200:
+        text = html_to_text(r["text"]) if r["text"] else ""
+        empty = r["status"] == 200 and len(text) < 400  # JS shell / interstitial
+        statuses.append(f"{calendar.month_abbr[m]} {y}: " + ("JS-empty" if empty else f"HTTP {r['status'] or r['error']}"))
+        if r["status"] != 200 or empty:
             continue
-        text = html_to_text(r["text"])
         title = re.search(r"(?is)<title>(.*?)</title>", r["text"])
         pub = newest(find_dates(text[:3000]), today)
         best = max(filter(None, [best, pub]), default=None)
