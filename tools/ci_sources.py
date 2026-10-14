@@ -52,6 +52,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 try:
     import yaml
@@ -64,6 +65,7 @@ UA = "Mozilla/5.0 (compatible; QW-CI-Research/1.0)"
 TIMEOUT = 25
 MAX_BYTES = 6_000_000
 SKIP_KINDS = {"social"}  # discovery-only channels; never fetched as sources
+TZ = ZoneInfo("America/Chicago")  # repo convention: dates are America/Chicago
 
 MONTHS = list(calendar.month_name)[1:]
 MONTH_RE = "|".join(m[:3] for m in MONTHS)
@@ -80,6 +82,10 @@ DATE_PATTERNS = [
 
 
 # --------------------------------------------------------------------------- utils
+
+def local_today():
+    return dt.datetime.now(TZ).date()
+
 
 def http_get(url, accept=None, retries=1):
     """GET a URL. Returns dict(status, ctype, text, url, error).
@@ -459,7 +465,7 @@ def run_all(comps, start, end, today, workers=8):
 
 def cmd_check(args):
     registry, version = load_registry(Path(args.registry))
-    today = dt.date.today()
+    today = local_today()
     print(f"Source-health pre-flight {today} (registry CI-Competitor.md v{version}; stale = newest entry older than "
           f"{args.stale_days} days)\n")
     comps = selected(registry, args.only)
@@ -505,7 +511,7 @@ def parse_window(a, b):
 
 def cmd_collect(args):
     registry, version = load_registry(Path(args.registry))
-    today = dt.date.today()
+    today = local_today()
     if args.start:
         start, end = parse_window(args.start, args.end)
     else:
