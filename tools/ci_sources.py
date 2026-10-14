@@ -314,25 +314,29 @@ def route_json_api(src, start, end, today):
 
 
 def date_from_url(url):
-    """A date carried in a URL path: /2026-09-24-Title (Cision MediaRoom newsrooms),
-    /2026/september/wednesday--16th-september.html (AEM doc nav trees), /2026/09/16/slug."""
+    """(date, precision) carried in a URL path, or (None, None): /2026-09-24-Title (Cision
+    MediaRoom newsrooms), /2026/september/wednesday--16th-september.html (AEM doc nav trees),
+    /2026/09/16/slug, or a month folder like /Release/Sep2026/ (MadCap Flare help sites)."""
     path = urllib.parse.unquote(urllib.parse.urlparse(url).path)
-    m = re.search(r"/(20\d\d)/(%s)[a-z]*/[^/]*?(\d{1,2})(?:st|nd|rd|th)\b" % MONTH_RE, path, re.I)
-    try:
-        if m:
-            return dt.date(int(m.group(1)), month_num(m.group(2)), int(m.group(3)))
-        m = re.search(r"/(20\d\d)/(\d\d)/(\d\d)(?:/|$)", path)
-        if m:
-            return dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
-    except ValueError:
-        return None
-    m = re.search(r"/(20\d\d)-(\d\d)-(\d\d)(?:\b|-)", path)
-    if m:
+    patterns = [
+        (r"/(20\d\d)/(%s)[a-z]*/[^/]*?(\d{1,2})(?:st|nd|rd|th)\b" % MONTH_RE, "ymonthd", "day"),
+        (r"/(20\d\d)/(\d\d)/(\d\d)(?:/|$)", "ymd", "day"),
+        (r"/(20\d\d)-(\d\d)-(\d\d)(?:\b|-)", "ymd", "day"),
+        (r"/(%s)[a-z]*[-_]?(20\d\d)/" % MONTH_RE, "monthy", "month"),
+    ]
+    for pat, kind, precision in patterns:
+        m = re.search(pat, path, re.I)
+        if not m:
+            continue
         try:
-            return dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+            if kind == "ymonthd":
+                return dt.date(int(m.group(1)), month_num(m.group(2)), int(m.group(3))), precision
+            if kind == "ymd":
+                return dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3))), precision
+            return dt.date(int(m.group(2)), month_num(m.group(1)), 1), precision
         except ValueError:
-            return None
-    return None
+            continue
+    return None, None
 
 
 def route_dated_links(src, start, end, today):
@@ -342,20 +346,27 @@ def route_dated_links(src, start, end, today):
     r = http_get(src["url"])
     if r["status"] != 200:
         return {"ok": False, "status": r["error"] or f"HTTP {r['status']}", "note": "", "entries": [], "newest": None}
-    # Anchors carry titles; quoted path strings catch links embedded in JSON (AEM nav trees).
+    # Anchors carry titles; quoted path strings catch links embedded in JSON or JS
+    # (AEM nav trees, Flare TOC chunks). `base` roots paths for help systems that live below the
+    # domain root (e.g. https://help.csod.com/cwfai/).
     candidates = re.findall(r'<a\b[^>]*?href="([^"#]+)"[^>]*>(.*?)</a>', r["text"], re.S | re.I)
-    candidates += [(p, "") for p in re.findall(r'"((?:https?://|/)[^"\s<>]+)"', r["text"])]
+    candidates += [(p, "") for p in re.findall(r'["\']((?:https?://|/)[^"\'\s<>]+)["\']', r["text"])]
     seen, entries, dates = set(), [], []
     for href, label in candidates:
-        url = urllib.parse.urljoin(r["url"], html.unescape(href)).split("?")[0]
-        d = date_from_url(url)
+        href = html.unescape(href)
+        if src.get("base") and href.startswith("/"):
+            url = urllib.parse.urljoin(src["base"], href.lstrip("/"))
+        else:
+            url = urllib.parse.urljoin(r["url"], href)
+        url = url.split("?")[0]
+        d, precision = date_from_url(url)
         if d is None or url in seen:
             continue
         seen.add(url)
         dates.append(d)
         if start is not None and in_window(d, start, end):
             title = html_to_text(label) or url.rstrip("/").rsplit("/", 1)[-1].replace("-", " ")
-            entries.append(entry(title, d, url, ""))
+            entries.append(entry(title, d, url, "", precision=precision))
     entries.sort(key=lambda e: e["date"], reverse=True)
     return {"ok": bool(seen), "status": f"HTTP 200, {len(seen)} dated links",
             "note": "" if seen else "no dated links found", "entries": entries, "newest": newest(dates, today)}
@@ -540,7 +551,8 @@ def route_wp_json(src, start, end, today):
     if start:
         params["after"] = f"{start.isoformat()}T00:00:00"
         params["before"] = f"{end.isoformat()}T23:59:59"
-    r = http_get(url + "?" + urllib.parse.urlencode(params), accept="application/json")
+    sep = "&" if "?" in url else "?"
+    r = http_get(url + sep + urllib.parse.urlencode(params), accept="application/json")
     if r["status"] != 200:
         return {"ok": False, "status": r["error"] or f"HTTP {r['status']}", "note": "", "entries": [], "newest": None}
     posts = json.loads(r["text"])
