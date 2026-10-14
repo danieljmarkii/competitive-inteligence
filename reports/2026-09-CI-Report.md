@@ -509,6 +509,7 @@ Environment notes: WebFetch, curl, and the tool's Python client all live, with d
 ```text
 Pre-flight (before curation, registry v2.4): 42 fetchable sources: OK=11 STALE=6 FAIL=9 NODATE=16 · 5 competitors with no sources · no healthy source: 13 of 21 (Gallup, Peakon / Workday, SurveyMonkey, ADP, Betterworks, Cornerstone OnDemand, Energage, Engagedly, Leapsome, Officevibe (Workleap), Perceptyx, Predictive Index, UKG) · runtime 2m36s
 After curation (registry v3.0):            55 sources: OK=39 STALE=5 FAIL=2 NODATE=9 · 0 competitors with no sources · no healthy source: 1 of 21 (Energage: no public product surface) · runtime 5s
+Recall test: a fresh `python3 tools/ci_sources.py collect 2026-09` against registry v3.0 surfaces 25 of 25 key items this run found by hand (512 raw entries in about 15s; 2m20s with the --news press sweep). Next month's run starts from that evidence pack instead of from search.
 
 Why the workflow wasn't learning (root cause):
 - Source Health only proposed replacements; "a human promotes them" had no owner, so five months of suggestions sat unactioned and every run re-hit the same walls.

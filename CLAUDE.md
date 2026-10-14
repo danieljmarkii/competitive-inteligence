@@ -4,9 +4,12 @@ Project memory for **Competitive Intelligence — Quantum Workplace (QW)**. Read
 
 ## What this repo is
 
-A monthly competitor-update workflow, run from Claude Code. It produces two deliverables for a date window:
+A monthly competitor-update workflow, run from Claude Code. For a date window it writes `reports/<YYYY-MM>-CI-Report.md` containing:
 1. **Slack Digest** — package-organized, paste-ready for Slack.
 2. **Package Brief** — audit-ready backup with sources, Source Health, and a coverage report.
+3. **Workflow Retro** (mandatory) — what broke, what worked, and what the run changed in the registry and playbook.
+
+Optional: a **Roadmap Watch** block for a squad, and a one-slide landscape PPTX for squad alignment decks.
 
 It is mostly a prompt/data system: the analytical "logic" lives in Markdown. Two small helper scripts in `tools/` do the mechanical parts (reading sources through proven routes; building the squad slide).
 

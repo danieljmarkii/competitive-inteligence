@@ -239,7 +239,7 @@ def excerpt_for_window(text, start, end, context=6, limit=6000):
 
 def entry(title, date, url, text, precision="day"):
     return {"title": (title or "").strip()[:200], "date": date.isoformat() if date else "",
-            "precision": precision if date else "unknown", "url": url, "text": (text or "").strip()[:1500]}
+            "precision": precision if date else "unknown", "url": url, "text": (text or "").strip()[:4000]}
 
 
 # ------------------------------------------------------------------------- routes
@@ -379,6 +379,9 @@ def route_sitemap(src, start, end, today):
     if r["status"] != 200:
         return {"ok": False, "status": r["error"] or f"HTTP {r['status']}", "note": "", "entries": [], "newest": None}
     pairs = re.findall(r"<loc>\s*(.*?)\s*</loc>\s*<lastmod>\s*(.*?)\s*</lastmod>", r["text"], re.S)
+    # Localized copies (/fr/..., /de-de/...) duplicate the English page and crowd out real changes.
+    locale = re.compile(r"^/(?!en(?:[-_][a-z]{2})?/)[a-z]{2}(?:[-_][a-z]{2})?/", re.I)
+    pairs = [(loc, lm) for loc, lm in pairs if not locale.match(urllib.parse.urlparse(html.unescape(loc)).path)]
     entries, dates = [], []
     for loc, lastmod in pairs:
         d = parse_any_date(lastmod)
@@ -388,7 +391,7 @@ def route_sitemap(src, start, end, today):
                                  precision="day (lastmod)"))
     entries.sort(key=lambda e: e["date"], reverse=True)
     return {"ok": True, "status": f"HTTP 200, {len(pairs)} URLs", "note": "lastmod = last edit, not publish date",
-            "entries": entries[:60], "newest": newest([d for d in dates if d], today)}
+            "entries": entries[:200], "newest": newest([d for d in dates if d], today)}
 
 
 def expand_template(url, y, m):
@@ -705,7 +708,7 @@ def cmd_collect(args):
                 md.append(f"  - {e['date'] or 'date ?'} | {e['title']} | {e['url']}")
                 body = e["text"].replace("\n", " ")
                 if body:
-                    md.append(f"    > {body[:900]}")
+                    md.append(f"    > {body[:2500]}")
                 rows.append({"competitor": comp["name"], "route": route, "source": src["url"], **e})
             if res["ok"] and not res["entries"]:
                 md.append("  - (no in-window entries found on this source)")
