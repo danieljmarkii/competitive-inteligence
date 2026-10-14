@@ -68,7 +68,8 @@ def build(content, out_path):
     slide.background.fill.fore_color.rgb = WHITE
 
     stats = content.get("stats", [])[:3]
-    head_w = W - 2 * MARGIN - (3.4 if stats else 0)
+    step = 1.25  # stat column pitch; labels wrap to two lines inside it
+    head_w = W - 2 * MARGIN - (step * len(stats) + 0.2 if stats else 0)
 
     # Kicker + headline
     p = text_box(slide, MARGIN, 0.45, head_w, 0.3).paragraphs[0]
@@ -79,12 +80,12 @@ def build(content, out_path):
 
     # Stat callouts, top right
     for i, s in enumerate(stats):
-        x = W - MARGIN - (len(stats) - i) * 1.1
-        tf = text_box(slide, x, 0.55, 1.0, 0.6, MSO_ANCHOR.BOTTOM)
+        x = W - MARGIN - (len(stats) - i) * step
+        tf = text_box(slide, x, 0.55, step - 0.1, 0.6, MSO_ANCHOR.BOTTOM)
         p = tf.paragraphs[0]
         p.alignment = PP_ALIGN.CENTER
         add_run(p, s["value"], 30, NAVY, bold=True)
-        tf = text_box(slide, x - 0.05, 1.18, 1.1, 0.6)
+        tf = text_box(slide, x, 1.18, step - 0.1, 0.6)
         p = tf.paragraphs[0]
         p.alignment = PP_ALIGN.CENTER
         add_run(p, s["label"], 10.5, MUTED)
