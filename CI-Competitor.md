@@ -1,6 +1,6 @@
 # CI — Competitor File — Lean Sources + Navigation Flags
 
-> **version:** 2.4 · **owner:** Competitive Intelligence · **last updated:** 2026-08-03
+> **version:** 2.5 · **owner:** Competitive Intelligence · **last updated:** 2026-11-24
 > Track versions in git, not in the filename.
 
 Purpose
@@ -42,6 +42,47 @@ Each `/ci-report` run appends/refreshes a short list of sources that were **bloc
 ```
 
 > The run does **not** silently rewrite the YAML below. It proposes replacements here; a human promotes good ones into `sources`. Add the `bot_blocked` flag to any URL that repeatedly fails.
+
+### 2026-10/11 run (observed 2026-11-24, full run, window 2026-10-01 → 2026-11-24)
+> Direct fetch live all run. Newly readable this run: Qualtrics weekly notes (no login wall), Perceptyx Freshdesk release notes (no longer bot-walled), Viva Glint full-body RSS, Gallup Product Updates via public Help Center JSON. Full detail in `reports/2026-10-11-CI-Report.md` → Source Health.
+
+```text
+PROMOTION CANDIDATES (verified this run):
+- Microsoft Viva / Glint | feed | https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/board?board.id=viva_glint_blog | dated, full bodies
+- Gallup | feed | https://support.gallup.com/api/v2/help_center/en-us/sections/53122467937811/articles.json?sort_by=created_at&sort_order=desc | dated Product Updates
+- SurveyMonkey | product_updates | https://www.surveymonkey.com/product/features/whats-new/ | now dated per item
+- Peakon / Workday | release_notes | https://doc.workday.com/peakon/en-us/workday-peakon-employee-voice/product-updates/release-notes/2026/<month>/<weekday>--<Nth>-<month>.html | day pages fetch clean; year index is JS-empty
+- Energage | feed | https://www.energage.com/feed/
+- Engagedly | feed | https://engagedly.com/feed/ (marketing only; changelog.engagedly.com is JS-only Beamer)
+
+Blocked / stale / gaps this run:
+- Leapsome | https://help.leapsome.com/hc/en-us/articles/360004361834-Platform-improvements | status: bot_blocked | observed: 2026-11-24
+  Suggested replacement (if found): none; roundup slugs 404, blog undated, newsroom stale since 2026-06-23 — curation gap
+- Betterworks | https://support.betterworks.com/hc/en-us/sections/360012378232-Release-Notes | status: bot_blocked | observed: 2026-11-24
+  Suggested replacement (if found): none stable; snippet recovery of dated "Release: <date>" articles
+- BambooHR | https://www.bamboohr.com/product-updates/ | status: bot_blocked | observed: 2026-11-24
+  Suggested replacement (if found): dated child pages + https://www.financialcontent.com/article/publisher/BambooHR%2C%20LLC
+- Paylocity | https://www.paylocity.com/company/about-us/newsroom/in-the-news/ | status: bot_blocked | observed: 2026-11-24
+  Suggested replacement (if found): https://rss.globenewswire.com/search/organization/Paylocity%20Corporation
+- UKG | https://www.ukg.com/about-us/newsroom | status: bot_blocked | observed: 2026-11-24
+  Suggested replacement (if found): https://www.financialcontent.com/article/publisher/UKG
+- ADP | https://mediacenter.adp.com/news-releases | status: 404 | observed: 2026-11-24
+  Suggested replacement (if found): https://mediacenter.adp.com/
+- Cornerstone OnDemand | https://www.cornerstoneondemand.com/resources/topics/cornerstone-news/ | status: stale | observed: 2026-11-24
+  Suggested replacement (if found): individual press-release pages (index JS-rendered)
+- Engagedly | https://engagedly.com/blog/?integration=Product+Updates | status: stale | observed: 2026-11-24
+  Suggested replacement (if found): https://engagedly.com/feed/
+- PerformYard | https://support.performyard.com/ | status: stale | observed: 2026-11-24
+  Suggested replacement (if found): https://www.performyard.com/blog (no product changelog)
+- SurveyMonkey | https://help.surveymonkey.com/en/surveymonkey/new/release-notes/ | status: stale | observed: 2026-11-24
+  Suggested replacement (if found): https://www.surveymonkey.com/product/features/whats-new/
+- Officevibe (Workleap) | https://help.workleap.com/en/ | status: replaced | observed: 2026-11-24
+  Suggested replacement (if found): no dated changelog; https://workleap.com/media + https://help.workleap.com/sitemap.xml (new-article detector)
+- Gallup | https://support.gallup.com/hc/en-us | status: bot_blocked | observed: 2026-11-24
+  Suggested replacement (if found): JSON feed above
+- Lattice | https://lattice.com/blog/november-2026-product-updates | status: 404 | observed: 2026-11-24
+  Suggested replacement (if found): not yet published; recheck early December
+```
 
 ### 2026-07 run (observed 2026-08-03, full run)
 > `WebFetch` live all run. Direct fetch clean for Culture Amp, 15Five, Predictive Index, Perceptyx (blog), Engagedly (blog), Leapsome (blog), Lattice hub. `WebSearch` route-arounds recovered Betterworks, Qualtrics, Viva Glint, Paylocity, BambooHR, Cornerstone. **Environment note: `web.archive.org` is unreachable from this environment — the Wayback route-around is unavailable; snippet-recovery is the working fallback for hard 403s.** Full detail in `reports/2026-07-CI-Report.md` → Source Health.
